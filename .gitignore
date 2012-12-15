@@ -1,0 +1,5 @@
+*.classpath
+*.project
+*.settings
+ALFCore/bin/
+#this is a comment

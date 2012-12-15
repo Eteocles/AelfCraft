@@ -1,0 +1,15 @@
+name: AelfCore
+main: com.alf.AlfCore
+version: 0.0
+authors: [Eteocles | DThielke, Sleaker, Kainzo]
+depend: [ Vault ]
+commands:
+  alf:
+    aliases: ['aelf']
+    description: AelfCore commands
+    usage: /<command>
+permissions:
+  alfcore.admin.*:
+    description: Gives access to administration commands for AlfCore
+    children:
+      
