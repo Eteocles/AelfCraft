@@ -1,5 +1,8 @@
 *.classpath
 *.project
 *.settings
+*.metadata
 ALFCore/bin/
+ChilldyChat/
+ChilldyRPG/
 #this is a comment
