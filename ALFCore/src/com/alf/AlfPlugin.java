@@ -92,6 +92,12 @@ public abstract class AlfPlugin extends JavaPlugin {
 		
 		registerEvents();
 		registerCommands();
+		//Setup for default configuration file
+		getConfig().options().header("Config File \n Please Specify database name and credentials below.");
+		getConfig().addDefault("mysql_url", "jdbc:mysql://localhost/ALF");
+		getConfig().addDefault("mysql_user", "root");
+		getConfig().addDefault("mysql_pass", "pass");
+		
 		
 		log(Level.INFO, "version " + getDescription().getVersion() + " is enabled!");
 		this.postSetup();
