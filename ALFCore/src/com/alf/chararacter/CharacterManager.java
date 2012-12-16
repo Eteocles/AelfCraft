@@ -20,9 +20,8 @@ public class CharacterManager {
 		
 	}
 
-	public Object getMaxHealth(LivingEntity lEntity) {
-		// TODO Auto-generated method stub
-		return null;
+	public int getMaxHealth(LivingEntity lEntity) {
+		throw new Error("Implement me!");
 	}
 
 }
