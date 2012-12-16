@@ -15,4 +15,8 @@ public class SkillManager {
 		return null;
 	}
 
+	public Skill getSkill(String name) {
+		return null;
+	}
+
 }
