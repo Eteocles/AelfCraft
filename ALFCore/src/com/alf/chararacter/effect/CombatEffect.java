@@ -1,11 +1,12 @@
 package com.alf.chararacter.effect;
 
+import java.util.Map;
+
 import org.bukkit.entity.LivingEntity;
 
 import com.alf.AlfCore;
 import com.alf.chararacter.Alf;
 import com.alf.chararacter.effect.CombatEffect.CombatReason;
-import com.alf.chararacter.effect.CombatEffect.LeaveCombatReason;
 
 public class CombatEffect extends PeriodicEffect {
 
@@ -33,29 +34,40 @@ public class CombatEffect extends PeriodicEffect {
 	}
 
 	public boolean isInCombat() {
-		// TODO Auto-generated method stub
-		return false;
+		throw new Error("Implement me!");
 	}
 
 	public boolean isInCombatWith(LivingEntity target) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new Error("Implement me!");
 	}
 
 	public void enterCombatWith(LivingEntity entity, CombatReason reason) {
-		// TODO Auto-generated method stub
-		
+		throw new Error("Implement me!");
 	}
 
 	public void reset() {
-		// TODO Auto-generated method stub
-		
+		throw new Error("Implement me!");
 	}
 
 	public void leaveCombatWith(Alf alf, LivingEntity entity,
 			LeaveCombatReason reason) {
-		// TODO Auto-generated method stub
-		
+		throw new Error("Implement me!");
+	}
+
+	public void leaveCombatFromLogout(Alf alf) {
+		throw new Error("Implement me!");
+	}
+
+	public void leaveCombatFromDeath(Alf alf) {
+		throw new Error("Implement me!");
+	}
+
+	public void leaveCombatFromSuicide(Alf alf) {
+		throw new Error("Implement me!");
+	}
+
+	public Map<LivingEntity, CombatReason> getCombatants() {
+		throw new Error("Implement me!");
 	}
 	
 }

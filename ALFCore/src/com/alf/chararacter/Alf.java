@@ -311,6 +311,14 @@ public class Alf extends CharacterTemplate {
 	}
 	
 	/**
+	 * Get the max mana of this Alf.
+	 * @return
+	 */
+	public int getMaxMana() {
+		throw new Error("Implement me!");
+	}
+	
+	/**
 	 * Get the mana for this Alf.
 	 * @return
 	 */
@@ -839,5 +847,43 @@ public class Alf extends CharacterTemplate {
 		return ! this.combat.isInCombat();
 	}
 	
+	/**
+	 * Have the Alf leave combat for a specific reason.
+	 * @param reason
+	 */
+	public void leaveCombat(CombatEffect.LeaveCombatReason reason) {
+		switch (reason) {
+			case LOGOUT:
+				this.combat.leaveCombatFromLogout(this);
+				break;
+			case DEATH:
+				this.combat.leaveCombatFromDeath(this);
+				break;
+			case SUICIDE:
+				this.combat.leaveCombatFromSuicide(this);
+			default:
+				break;
+		}
+	}
+	
+	/**
+	 * Get the total combatants this Alf is fighting with.
+	 * @return
+	 */
+	public Map<LivingEntity, CombatEffect.CombatReason> getCombatants() {
+		return this.combat.getCombatants();
+	}
+	
+	/**
+	 * Get the location being viewed by a player.
+	 * @param distance
+	 * @return
+	 */
+	public Location getViewingLocation(double distance) {
+		Location location = getPlayer().getLocation();
+		//Standard procedure. Get the unit vector and multiply by the block distance magnitude.
+		location.add(location.getDirection().normalize().multiply(distance));
+		return location;
+	}
 	
 }
