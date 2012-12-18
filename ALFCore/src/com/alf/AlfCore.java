@@ -2,6 +2,7 @@ package com.alf;
 
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -14,6 +15,8 @@ import com.alf.chararacter.classes.AlfClassManager;
 import com.alf.chararacter.effect.EffectManager;
 import com.alf.chararacter.party.PartyManager;
 import com.alf.command.commands.HelpCommand;
+import com.alf.listener.AEntityListener;
+import com.alf.listener.APlayerListener;
 import com.alf.skill.SkillConfigManager;
 import com.alf.skill.SkillManager;
 import com.alf.util.ConfigManager;
@@ -228,6 +231,7 @@ public class AlfCore extends AlfPlugin {
 	}
 
 	protected void registerEvents() {
-
+		Bukkit.getPluginManager().registerEvents(new AEntityListener(this), this);
+		Bukkit.getPluginManager().registerEvents(new APlayerListener(this), this);
 	}
 }

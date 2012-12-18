@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -47,12 +48,16 @@ public class Alf extends CharacterTemplate {
 	private AlfDamageCause lastDamageCause = null;
 	//Types of experience.
 	private Map<String, Double> experience = new ConcurrentHashMap<String, Double>();
+	//Binds
 	private Map<Material, String[]> binds = new ConcurrentHashMap<Material, String[]>();
+	//Skills
 	private Map<String, ConfigurationSection> skills = new HashMap<String, ConfigurationSection>();
 	//Permission values.
 	private PermissionAttachment transientPerms;
 	//Combat effect.
 	private final CombatEffect combat;
+	//
+	private List<ItemStack> invFromDeath = new ArrayList<ItemStack>();
 	//
 	ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	
@@ -421,6 +426,14 @@ public class Alf extends CharacterTemplate {
 	}
 	
 	/**
+	 * Access the player's inventory from death.
+	 * @return
+	 */
+	public List<ItemStack> getInvFromDeath() {
+		return this.invFromDeath;
+	}
+	
+	/**
 	 * Whether this Alf has a bind matched to the material.
 	 * @param mat
 	 * @return
@@ -683,6 +696,14 @@ public class Alf extends CharacterTemplate {
 	 */
 	public void setSuppresedSkills(Collection<String> suppressedSkills) {
 		throw new Error("Implement me!");
+	}
+
+	/**
+	 * Set the player's death inventory so it can be restored.
+	 * @param inv
+	 */
+	public void setInvOnDeath(List<ItemStack> inv) {
+		this.invFromDeath = inv;
 	}
 	
 	/**

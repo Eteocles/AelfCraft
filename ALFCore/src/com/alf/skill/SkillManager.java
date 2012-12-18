@@ -1,5 +1,7 @@
 package com.alf.skill;
 
+import java.util.Collection;
+
 import org.bukkit.command.CommandSender;
 
 import com.alf.AlfCore;
@@ -17,6 +19,10 @@ public class SkillManager {
 
 	public Skill getSkill(String name) {
 		return null;
+	}
+
+	public Collection<Skill> getSkills() {
+		throw new Error("Implement me!");
 	}
 
 }

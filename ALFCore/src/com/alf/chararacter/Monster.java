@@ -141,4 +141,29 @@ public class Monster extends CharacterTemplate {
 	public CreatureSpawnEvent.SpawnReason getSpawnReason() {
 		return this.spawnReason;
 	}
+	
+	/**
+	 * Add a skill to this Monster.
+	 * @param skill
+	 * @param section
+	 */
+	public void addSkill(String skill, ConfigurationSection section) {
+		this.skills.put(skill.toLowerCase(), section);
+	}
+	
+	/**
+	 * Get a map of skills.
+	 */
+	public Map<String, ConfigurationSection> getSkills() {
+		return new HashMap<String, ConfigurationSection>(this.skills);
+	}
+
+	/**
+	 * Remove a skill from the Monster.
+	 * @param skill
+	 */
+	public void removeSkill(String skill) {
+		this.skills.remove(skill.toLowerCase());
+	}
+	
 }

@@ -6,7 +6,6 @@ import org.bukkit.entity.LivingEntity;
 
 import com.alf.AlfCore;
 import com.alf.chararacter.Alf;
-import com.alf.chararacter.effect.CombatEffect.CombatReason;
 
 public class CombatEffect extends PeriodicEffect {
 

@@ -1,9 +1,10 @@
 package com.alf.util;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.classes.AlfClass;
 
 public class Properties {
+
+	public final long manaRegenInterval = 0;
 
 	public void load(AlfCore alfCore) {
 		// TODO Auto-generated method stub
