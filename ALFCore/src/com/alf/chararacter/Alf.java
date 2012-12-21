@@ -12,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -56,8 +55,6 @@ public class Alf extends CharacterTemplate {
 	private PermissionAttachment transientPerms;
 	//Combat effect.
 	private final CombatEffect combat;
-	//
-	private List<ItemStack> invFromDeath = new ArrayList<ItemStack>();
 	//
 	ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	
@@ -312,7 +309,8 @@ public class Alf extends CharacterTemplate {
 	 * Get the max health of this Alf.
 	 */
 	public int getMaxHealth() {
-		throw new Error("Implement me!");
+		//TODO
+		return 100;
 	}
 	
 	/**
@@ -320,7 +318,8 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public int getMaxMana() {
-		throw new Error("Implement me!");
+		//TODO
+		return 100;
 	}
 	
 	/**
@@ -423,14 +422,6 @@ public class Alf extends CharacterTemplate {
 	 */
 	public Set<String> getSuppressedSkills() {
 		throw new Error("Implement me!");
-	}
-	
-	/**
-	 * Access the player's inventory from death.
-	 * @return
-	 */
-	public List<ItemStack> getInvFromDeath() {
-		return this.invFromDeath;
 	}
 	
 	/**
@@ -699,14 +690,6 @@ public class Alf extends CharacterTemplate {
 	}
 
 	/**
-	 * Set the player's death inventory so it can be restored.
-	 * @param inv
-	 */
-	public void setInvOnDeath(List<ItemStack> inv) {
-		this.invFromDeath = inv;
-	}
-	
-	/**
 	 * Set whether this Alf is verbose.
 	 * @param verbose
 	 */
@@ -810,7 +793,7 @@ public class Alf extends CharacterTemplate {
 	 * Reset the combat effect.
 	 */
 	public void resetCombatEffect() {
-		addEffect(this.combat);
+//		addEffect(this.combat);
 	}
 	
 	/**

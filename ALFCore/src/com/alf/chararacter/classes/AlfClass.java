@@ -18,5 +18,18 @@ public class AlfClass {
 	public int getMaxLevel() {
 		throw new Error("Implement me!");
 	}
+
+	public int getBaseMaxHealth() {
+		// TODO Auto-generated method stub
+		return 100;
+	}
+
+	public boolean isPrimary() {
+		throw new Error("Implement me!");
+	}
+
+	public boolean isSecondary() {
+		throw new Error("Implement me!");
+	}
 	
 }

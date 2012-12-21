@@ -20,6 +20,7 @@ import com.alf.listener.APlayerListener;
 import com.alf.skill.SkillConfigManager;
 import com.alf.skill.SkillManager;
 import com.alf.util.ConfigManager;
+import com.alf.util.DeathManager;
 import com.alf.util.Properties;
 
 /**
@@ -44,6 +45,8 @@ public class AlfCore extends AlfPlugin {
 	private SkillManager skillManager;
 	//Skill configuration.
 	private SkillConfigManager skillConfigs;
+	//Death manager for handling player deaths.
+	private DeathManager deathManager;
 	//Properties reference for constants.
 	public static final Properties properties = new Properties();
 	//Link to external Economy.
@@ -118,6 +121,14 @@ public class AlfCore extends AlfPlugin {
 	public EffectManager getEffectManager() {
 		return this.effectManager;
 	}
+	
+	/**
+	 * Get AelfCraft's death manager.
+	 * @return - the death manager type
+	 */
+	public DeathManager getDeathManager() {
+		return this.deathManager;
+	}
 
 	/**
 	 * Get AelfCraft's skill configs.
@@ -183,6 +194,7 @@ public class AlfCore extends AlfPlugin {
 			this.characterManager = new CharacterManager(this);
 			this.damageManager = new CharacterDamageManager(this);
 			this.skillManager = new SkillManager(this);
+			this.deathManager = new DeathManager(this);
 
 			if (! this.configManager.loadManagers()) {
 				getPluginLoader().disablePlugin(this);

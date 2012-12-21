@@ -1,9 +1,14 @@
 package com.alf.listener;
 
-import net.minecraft.server.EntityPlayer;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+
+import net.minecraft.server.v1_4_5.EntityPlayer;
 
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,6 +24,10 @@ import com.alf.chararacter.Alf;
 import com.alf.chararacter.CharacterManager;
 import com.alf.chararacter.effect.CombatEffect;
 import com.alf.command.Command;
+import com.alf.util.DeathManager;
+import com.alf.util.DeathManager.PlayerInventoryStorage;
+import com.alf.util.DeathManager.StoredItemStack;
+import com.alf.util.Util;
 
 /**
  * Handle player related events.
@@ -104,9 +113,26 @@ public class APlayerListener implements Listener {
 //		alf.setHealth(alf.getMaxHealth());
 		alf.setMana(0);
 		
-		PlayerInventory pi = player.getInventory();
-		for (ItemStack is : alf.getInvFromDeath())
-			pi.addItem(is);
+		//If the DeathManager contains the stored player...
+		DeathManager dm = this.plugin.getDeathManager();
+		if (dm.containsPlayer(player)) {
+			AlfCore.log(Level.INFO, "Death Manager contains player: " + player.getName());
+			//Remove player from DeathManager.
+			PlayerInventoryStorage invStore = dm.popPlayer(player);
+			PlayerInventory playerInv = player.getInventory();
+			List<StoredItemStack> inv = invStore.getInventory();
+			//Restore items or drop them if needed.
+			for (StoredItemStack is : inv) {
+				//If spot is occupied...
+				if (playerInv.getItem(is.getSlot()) != null) {
+					HashMap<Integer, ItemStack> leftovers = playerInv.addItem(new ItemStack[] { is.getItem() });
+					if (leftovers.size() > 0)
+		            	Util.dropItems(player.getLocation(), leftovers, false);
+				} 		           
+				else 
+	            	playerInv.setItem(is.getSlot(), is.getItem());
+			}
+		}
 		
 		CraftPlayer craftPlayer = (CraftPlayer) player;
 		EntityPlayer entityPlayer = craftPlayer.getHandle();

@@ -6,4 +6,8 @@ public class AlfClassManager {
 		throw new Error("Implement me!");
 	}
 
+	public AlfClass getClass(String string) {
+		throw new Error("Implement me!");
+	}
+
 }

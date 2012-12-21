@@ -54,7 +54,8 @@ public class CharacterManager {
 		this.alfs = new HashMap<String, Alf>();
 		this.entityQueue = new ConcurrentLinkedQueue<Entity>();
 		this.monsters = new ConcurrentHashMap<UUID, Monster>();
-		this.taskId = plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, new EntityReaper(), 100L, 100L);
+		this.taskId = plugin.getServer().getScheduler().runTaskTimerAsynchronously(
+				plugin, new EntityReaper(), 100L, 100L).getTaskId();
 	
 		this.alfStorage = new YMLAlfStorage(plugin);
 		
@@ -172,7 +173,7 @@ public class CharacterManager {
 		}
 		alf = this.alfStorage.loadAlf(p);
 		addAlf(alf);
-		performSkillChecks(alf);
+//		performSkillChecks(alf);
 		AlfCore.debug.stopTask("AlfManager.getAlf");
 		return alf;
 	}

@@ -2,7 +2,7 @@ package com.alf.persistence;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,6 +18,7 @@ import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
 import com.alf.chararacter.Alf;
+import com.alf.chararacter.classes.AlfClass;
 
 /**
  * Stores Alf data in YML.
@@ -27,7 +29,7 @@ public class YMLAlfStorage extends AlfStorage {
 	private final File playerFolder;
 	//Queue for Alfs to save.
 	private Map<String, Alf> toSave = new ConcurrentHashMap<String, Alf>();
-	private final int SAVE_INTERVAL = 6000;
+	private final long SAVE_INTERVAL = 6000;
 	private int id = 0;
 
 	/**
@@ -39,13 +41,85 @@ public class YMLAlfStorage extends AlfStorage {
 		this.playerFolder = new File(plugin.getDataFolder(), "players");
 		this.playerFolder.mkdirs();
 
-		this.id = Bukkit.getScheduler().scheduleAsyncRepeatingTask(plugin, 
-				new AlfSaveThread(), SAVE_INTERVAL, SAVE_INTERVAL);
+		this.id = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
+				new AlfSaveThread(), SAVE_INTERVAL, SAVE_INTERVAL).getTaskId();
 	}
 
+	/**
+	 * Load an Alf from a given player.
+	 */
 	public Alf loadAlf(Player player) {
-		// TODO Auto-generated method stub
-		return null;
+		if (this.toSave.containsKey(player.getName())) {
+			Alf alf = (Alf) this.toSave.get(player.getName());
+			alf.setPlayer(player);
+			return alf;
+		}
+		File pFolder = new File(this.playerFolder, player.getName().toLowerCase().substring(0, 1));
+		pFolder.mkdirs();
+		File playerFile = new File(pFolder, player.getName() + ".yml");
+		
+		if (playerFile.exists()) {
+			Configuration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
+//			AlfClass playerClass = loadClass(player, playerConfig);
+//			if (playerClass == null) {
+//				AlfCore.log(Level.INFO, "Invalid class found for " + player.getName() + ". Resetting player.");
+//				return createNewAlf(player);
+//			}
+//			AlfClass secondClass = loadSecondaryClass(player, playerConfig);
+			//TODO
+			Alf playerAlf = new Alf(this.plugin, player, null, null);
+			
+			playerAlf.setMana(playerConfig.getInt("mana", 0));
+			playerAlf.setHealth(playerConfig.getInt("health", 100)); //TODO CHANGE FROM 100
+			playerAlf.setVerbose(playerConfig.getBoolean("verbose", true));
+//			playerAlf.setSuppresedSkills(playerConfig.getStringList("suppressed"));
+			
+			AlfCore.log(Level.INFO, "Loaded alf: " + player.getName() + " with EID: " + player.getEntityId());
+			return playerAlf;
+		}
+		AlfCore.log(Level.INFO, "Created alf: " + player.getName());
+		return createNewAlf(player);
+	}
+	
+	/**
+	 * 
+	 * @param player
+	 * @param config
+	 * @return
+	 */
+	public AlfClass loadClass(Player player, Configuration config) {
+		AlfClass playerClass = null;
+		AlfClass defaultClass = this.plugin.getClassManager().getDefaultClass();
+		
+		if (config.getString("class") != null) {
+			playerClass = this.plugin.getClassManager().getClass(config.getString("class"));
+			if (playerClass == null)
+				playerClass = defaultClass;
+			else if (! playerClass.isPrimary())
+				playerClass = defaultClass;
+		}
+		else
+			playerClass = defaultClass;
+		return playerClass;
+	}
+	
+	/**
+	 * 
+	 * @param player
+	 * @param config
+	 * @return
+	 */
+	public AlfClass loadSecondaryClass(Player player, Configuration config) {
+		AlfClass playerClass = null;
+		
+		if (config.getString("secondary-class") != null) {
+			playerClass = this.plugin.getClassManager().getClass(config.getString("secondary-class"));
+			if (playerClass == null || ! playerClass.isSecondary()) {
+				AlfCore.log(Level.SEVERE, "Invalid secondary class was defined for " + player.getName() + " resetting to nothing!");
+				return null;
+			}
+		}
+		return playerClass;
 	}
 
 	/**
@@ -110,9 +184,29 @@ public class YMLAlfStorage extends AlfStorage {
 	}
 	
 
+	/**
+	 * Shut down 
+	 */
 	public void shutdown() {
-		// TODO Auto-generated method stub
-
+		Bukkit.getScheduler().cancelTask(this.id);
+		Collection<Alf> unsaved = this.plugin.getCharacterManager().getAlfs();
+		Iterator<Entry<String, Alf>> iter = this.toSave.entrySet().iterator();
+		while (iter.hasNext()) {
+			Alf alf = (Alf) ((Map.Entry<String, Alf>)iter.next()).getValue();
+			try {
+				doSave(alf);
+				unsaved.remove(alf);
+			} catch (Exception e) {
+				AlfCore.log(Level.SEVERE, "There was a problem saving the alf: " + alf.getName());
+			}
+			iter.remove();
+		}
+		for (Alf alf : unsaved)
+			try {
+				doSave(alf);
+			} catch(Exception e) {
+				AlfCore.log(Level.SEVERE, "There was a problem saving the alf: " + alf.getName());
+			}
 	}
 
 	/**
