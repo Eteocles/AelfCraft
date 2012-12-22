@@ -1,0 +1,45 @@
+channels:
+  - general
+  - trading
+  - help
+  - admin
+  - mod
+  - guests
+  - announcer
+general:
+  color: GOLD
+  identifier: g
+  type: 1
+trading:
+  color: BLUE
+  identifier: t
+  type: 1
+help:
+  color: AQUA
+  identifier: h
+  type: 1
+admin:
+  permission: alfchat.channel.admin
+  color: RED
+  identifier: a
+  type: 1
+mod:
+  permission: alfchat.channel.mod
+  color: LIGHT_PURPLE
+  identifier: m
+  type: 1
+guests:
+  color: GRAY
+  identifier: v
+  type: 1
+announcer:
+  color: DARK_GREEN
+  identifier: b
+  type: 3
+  announcements:
+    - This is a test broadcast!
+    - I love strawberry shortcake!
+    - What is love?
+  frequency: 1000
+default: general
+guest: guests

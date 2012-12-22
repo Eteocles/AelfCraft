@@ -150,7 +150,7 @@ public class Messaging {
 		msg = col + msg;
 		if (params != null)
 			for (int i = 0; i < params.length; i++)
-				msg = msg.replace("$"+(i+1), ChatColor.WHITE + params[i].toString() + col);
+				msg = msg.replace("$"+(i+1), params[i].toString());
 		return msg;
 	}
 	

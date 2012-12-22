@@ -8,7 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.alf.command.CommandHandler;
+import com.alf.command.CommandParser;
 import com.alf.util.DebugLog;
 
 /**
@@ -28,7 +28,7 @@ public abstract class AlfPlugin extends JavaPlugin {
 	//Debug output.
 	private static DebugLog debugLog;
 	//Command handler for parsing commands.
-	private CommandHandler commandHandler = new CommandHandler(this);
+	protected CommandParser commandParser;
 	
 	/**
 	 * Constructs the plugin with a name.
@@ -61,8 +61,8 @@ public abstract class AlfPlugin extends JavaPlugin {
 	 * Get the command handler for this Alf plugin.
 	 * @return - CommandHandler object
 	 */
-	public CommandHandler getCommandHandler() {
-		return this.commandHandler;
+	public CommandParser getCommandParser() {
+		return this.commandParser;
 	}
 
 	/**
@@ -70,7 +70,7 @@ public abstract class AlfPlugin extends JavaPlugin {
 	 * @return - the results of the dispatch
 	 */
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		return this.commandHandler.dispatch(sender, command.getName(), label, args);
+		return this.commandParser.dispatch(sender, command.getName(), label, args);
 	}
 	
 	/**
@@ -92,6 +92,7 @@ public abstract class AlfPlugin extends JavaPlugin {
 		
 		registerEvents();
 		registerCommands();
+		
 		//Setup for default configuration file
 		getConfig().options().header("Config File \n Please Specify database name and credentials below.");
 		getConfig().addDefault("mysql_url", "jdbc:mysql://localhost/ALF");

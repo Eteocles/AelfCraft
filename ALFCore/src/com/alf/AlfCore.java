@@ -14,6 +14,7 @@ import com.alf.chararacter.CharacterManager;
 import com.alf.chararacter.classes.AlfClassManager;
 import com.alf.chararacter.effect.EffectManager;
 import com.alf.chararacter.party.PartyManager;
+import com.alf.command.CommandHandler;
 import com.alf.command.commands.HelpCommand;
 import com.alf.listener.AEntityListener;
 import com.alf.listener.APlayerListener;
@@ -55,15 +56,11 @@ public class AlfCore extends AlfPlugin {
 	public static Permission perms;
 
 	/**
-	 * Inherited constructor.
-	 * @param name - name of the plugin
+	 * Default constructor.
 	 */
-	public AlfCore(String name) {
-		super(name);
-	}
-
 	public AlfCore() {
 		super("AlfCore");
+		this.commandParser = new CommandHandler(this);
 	}
 
 	/**
@@ -239,7 +236,7 @@ public class AlfCore extends AlfPlugin {
 	}
 
 	protected void registerCommands() {
-		this.getCommandHandler().addCommand(new HelpCommand(this));
+		this.getCommandParser().addCommand(new HelpCommand(this));
 	}
 
 	protected void registerEvents() {

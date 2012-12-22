@@ -1,14 +1,18 @@
-package com.alf.command;
+package com.alf.chat;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
-import com.alf.AlfPlugin;
-import com.alf.skill.Skill;
+import com.alf.command.Command;
+import com.alf.command.CommandParser;
 import com.alf.util.Messaging;
 
 /**
@@ -20,14 +24,12 @@ public class CommandHandler implements CommandParser {
 	//Instance variables.
 	protected LinkedHashMap<String, Command> commands;
 	protected HashMap<String, Command> identifiers;
-	private AlfPlugin plugin;
 	
 	/**
 	 * Construct the Command Handler. 
 	 * @param alfPlugin
 	 */
-	public CommandHandler(AlfPlugin alfPlugin) {
-		this.plugin = alfPlugin;
+	public CommandHandler() {
 		this.commands = new LinkedHashMap<String, Command>();
 		this.identifiers = new HashMap<String, Command>();
 	}
@@ -49,9 +51,7 @@ public class CommandHandler implements CommandParser {
 	 */
 	private void displayCommandHelp(Command cmd, CommandSender sender) {
 		sender.sendMessage("§cCommand:§e "+cmd.getName());
-		if (sender instanceof Player && cmd instanceof Skill) {
-			sender.sendMessage("§c");
-		} else sender.sendMessage("§cUsage:§e " + cmd.getUsage());
+		sender.sendMessage("§cUsage:§e " + cmd.getUsage());
 
 		if (cmd.getNotes() != null) 
 			for (String note : cmd.getNotes())
@@ -65,9 +65,6 @@ public class CommandHandler implements CommandParser {
 	 * @return the command object
 	 */
 	public Command getCmdFromIdent(String ident, CommandSender executor) {
-		Skill skill = ((AlfCore)this.plugin).getSkillManager().getSkillFromIdent(ident, executor);
-		if (skill != null)
-			return skill;
 		
 		if (this.identifiers.get(ident.toLowerCase()) == null) {
 			for (Command cmd : this.commands.values()) {

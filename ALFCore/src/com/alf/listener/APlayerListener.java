@@ -97,7 +97,7 @@ public class APlayerListener implements Listener {
 		alfManager.saveAlf(alf, true);
 		alfManager.removeAlf(alf);
 		
-		for (Command command : this.plugin.getCommandHandler().getCommands())
+		for (Command command : this.plugin.getCommandParser().getCommands())
 			if (command.isInteractive())
 				command.cancelInteraction(player);
 	}

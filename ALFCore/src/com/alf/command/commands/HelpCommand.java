@@ -47,7 +47,7 @@ public class HelpCommand extends BasicCommand {
 				page = Integer.parseInt(args[0]) - 1;
 			} catch (NumberFormatException e) {
 			}
-		List<Command> sortCommands = this.plugin.getCommandHandler().getCommands();
+		List<Command> sortCommands = this.plugin.getCommandParser().getCommands();
 		List<Command> commands = new ArrayList<Command>();
 		
 		for (Command command : sortCommands) {

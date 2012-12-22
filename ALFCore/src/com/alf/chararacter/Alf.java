@@ -39,6 +39,8 @@ public class Alf extends CharacterTemplate {
 	private AlfClass secondClass;
 	//Mana
 	private AtomicInteger mana = new AtomicInteger(0);
+	//Karma
+	private AtomicInteger karma = new AtomicInteger(100);
 	//Player Party
 	private AlfParty party = null;
 	//Output messages or not

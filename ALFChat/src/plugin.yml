@@ -1,0 +1,23 @@
+name: AelfChat
+main: com.alf.chat.AlfChat
+version: 0.0
+authors: [Eteocles]
+description: Chat customization- Channels, Filtering, etc.
+depend: []
+softdepend: []
+commands:
+  chat:
+    description: ChilldyChat commands
+    usage: /<command>
+  ch:
+    aliases: ['channel', 'channels']
+    description: Channel commands
+    usage: /<command>
+  mych:
+    aliases: ['mychannels']
+    description: List player's current channels
+    usage: /<command>
+permissions:
+  alfchat.*:
+    description: Gives access to administration commands for AlfChat
+    children:
