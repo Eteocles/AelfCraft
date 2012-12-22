@@ -3,6 +3,7 @@
 *.settings
 *.metadata
 ALFCore/bin/
+ALFChat/bin/
 ChilldyChat/
 ChilldyRPG/
 #this is a comment
