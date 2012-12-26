@@ -1,5 +1,7 @@
 package com.alf.util;
 
+import java.io.File;
+
 import com.alf.AlfCore;
 
 public class ConfigManager {
@@ -16,6 +18,11 @@ public class ConfigManager {
 	public boolean loadManagers() {
 		
 		return true;
+	}
+
+	public void checkForConfig(File outsourcedSkillConfigFile) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

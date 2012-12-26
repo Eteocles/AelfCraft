@@ -4,7 +4,11 @@ import com.alf.AlfCore;
 
 public class Properties {
 
-	public final long manaRegenInterval = 0;
+	public int combatTime;
+	public int manaRegenInterval;
+	public double potHealthPerTier;
+	public boolean slowCasting;
+	public int globalCooldown;
 
 	public void load(AlfCore alfCore) {
 		// TODO Auto-generated method stub

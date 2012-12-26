@@ -56,6 +56,25 @@ public class Messaging {
 	}
 	
 	/**
+	 * Create a text representation of a mana bar.
+	 * @param mana
+	 * @param maxMana
+	 * @return
+	 */
+	public static String createManaBar(int mana, int maxMana) {
+		String manaBar = ChatColor.RED + "[" + ChatColor.AQUA;
+		int percent = (int) (((double) mana / (double) maxMana) * 100.0D);
+		int progress = percent / 2;
+		for (int i = 0; i < progress; i++)
+			manaBar += '|';
+		manaBar += ChatColor.DARK_BLUE;
+		for (int i = 0; i < 50 - progress; i++)
+			manaBar += '|';
+		manaBar += ChatColor.RED + "]";
+		return manaBar + " - " + ChatColor.BLUE + "%";
+	}
+	
+	/**
 	 * Get the Living Entity friendly name of a living entity.
 	 * @param lEntity
 	 * @return
@@ -153,5 +172,5 @@ public class Messaging {
 				msg = msg.replace("$"+(i+1), params[i].toString());
 		return msg;
 	}
-	
+
 }

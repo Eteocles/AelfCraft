@@ -1,10 +1,30 @@
 package com.alf.chararacter.classes;
 
+import org.bukkit.Material;
+
+import com.alf.chararacter.CharacterDamageManager.ProjectileType;
+
 public class AlfClass {
 
 	public static enum ExperienceType
 	{
-		
+		//Non-Profession Experience Types
+		SKILL,
+		KILLING,
+		PVP,
+		DEATH,
+		ADMIN,
+		EXTERNAL,
+		QUESTING,
+		//Profession Experience Types
+		MINING, 
+		ENCHANTING, SMITHING,
+		LOGGING,
+		FISHING,
+		FARMING, SHEARING, BREEDING,
+		ENGINEERING,
+		BREWING, IMBUING,
+		TRADING
 	}
 
 	public String getName() {
@@ -29,6 +49,22 @@ public class AlfClass {
 	}
 
 	public boolean isSecondary() {
+		throw new Error("Implement me!");
+	}
+
+	public int getProjectileDamage(ProjectileType type) {
+		throw new Error("Implement me!");
+	}
+
+	public double getProjDamageLevel(ProjectileType type) {
+		throw new Error("Implement me!");
+	}
+
+	public int getItemDamage(Material item) {
+		throw new Error("Implement me!");
+	}
+
+	public int getItemDamageLevel(Material item) {
 		throw new Error("Implement me!");
 	}
 	
