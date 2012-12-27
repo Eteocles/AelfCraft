@@ -6,6 +6,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfPlugin;
+import com.alf.chararacter.CharacterTemplate;
 
 /**
  * Messaging Utility for AelfCraft.
@@ -72,6 +73,10 @@ public class Messaging {
 			manaBar += '|';
 		manaBar += ChatColor.RED + "]";
 		return manaBar + " - " + ChatColor.BLUE + "%";
+	}
+	
+	public static String getLivingEntityName(CharacterTemplate character) {
+		return getLivingEntityName(character.getEntity());
 	}
 	
 	/**

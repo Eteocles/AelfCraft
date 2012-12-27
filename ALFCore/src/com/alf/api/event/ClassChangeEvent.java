@@ -1,5 +1,6 @@
 package com.alf.api.event;
 
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -10,7 +11,7 @@ import com.alf.chararacter.classes.AlfClass;
  * Describes an event in which an Alf changes classes.
  * @author Eteocles
  */
-public class ClassChangeEvent extends Event {
+public class ClassChangeEvent extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();
 	protected boolean cancelled = false;

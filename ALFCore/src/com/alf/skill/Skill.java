@@ -35,6 +35,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.alf.AlfCore;
 import com.alf.chararacter.Alf;
+import com.alf.chararacter.CharacterTemplate;
 import com.alf.command.BasicCommand;
 import com.alf.util.Messaging;
 import com.alf.util.Setting;
@@ -81,8 +82,8 @@ public abstract class Skill extends BasicCommand {
 	 * @param o
 	 * @param alf
 	 */
-	public void addSpellTarget(Entity o, Alf alf) {
-		this.plugin.getDamageManager().addSpellTarget(o, alf, this);
+	public void addSpellTarget(Entity o, CharacterTemplate character) {
+		this.plugin.getDamageManager().addSpellTarget(o, character, this);
 	}
 	
 	/**
@@ -262,6 +263,20 @@ public abstract class Skill extends BasicCommand {
 			}
 			return true;
 		}
+		return false;
+	}
+	
+	/**
+	 * Whether a given character has a reagent.
+	 * Monsters will have infinite reagents.
+	 * @param character
+	 * @return
+	 */
+	protected boolean hasReagentCost(CharacterTemplate character) {
+		if (character instanceof Alf)
+			return hasReagentCost((Alf) character);
+		else if (character instanceof Monster)
+			return true;
 		return false;
 	}
 	

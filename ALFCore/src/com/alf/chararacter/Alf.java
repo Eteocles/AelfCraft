@@ -7,9 +7,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -17,11 +19,15 @@ import org.bukkit.permissions.PermissionAttachment;
 
 import com.alf.AlfCore;
 import com.alf.api.AlfDamageCause;
+import com.alf.api.event.AlfChangeLevelEvent;
+import com.alf.api.event.ExperienceChangeEvent;
 import com.alf.chararacter.classes.AlfClass;
 import com.alf.chararacter.effect.CombatEffect;
 import com.alf.chararacter.party.AlfParty;
 import com.alf.skill.DelayedSkill;
 import com.alf.skill.Skill;
+import com.alf.skill.SkillConfigManager;
+import com.alf.util.Messaging;
 import com.alf.util.Properties;
 import com.alf.util.Setting;
 
@@ -49,12 +55,27 @@ public class Alf extends CharacterTemplate {
 	private AlfDamageCause lastDamageCause = null;
 	//Types of experience.
 	private Map<String, Double> experience = new ConcurrentHashMap<String, Double>();
+	//Cooldowns
+	private Map<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
+	//Set of summons.
+	private Set<Monster> summons = new HashSet<Monster>();
 	//Binds
 	private Map<Material, String[]> binds = new ConcurrentHashMap<Material, String[]>();
+	//Suppressed Skills (Can't be used)
+	private Map<String, Boolean> suppressedSkills = new ConcurrentHashMap<String, Boolean>();
+	//Persistent skill settings.
+	private Map<String, ConfigurationSection> persistedSkillSettings = new ConcurrentHashMap<String, 
+			ConfigurationSection>();
 	//Skills
 	private Map<String, ConfigurationSection> skills = new HashMap<String, ConfigurationSection>();
+	//Sync primary class info.
+	private boolean syncPrimary = true;
+	//Tiered level count.
+	private Integer tieredLevel;
 	//Permission values.
 	private PermissionAttachment transientPerms;
+	//Alf's delayed skill.
+	private DelayedSkill delayedSkill = null;
 	//Combat effect.
 	private final CombatEffect combat;
 	//
@@ -74,7 +95,7 @@ public class Alf extends CharacterTemplate {
 		this.secondClass = secondClass;
 		
 		this.combat = new CombatEffect(plugin);
-//		addEffect(this.combat);
+		addEffect(this.combat);
 		this.transientPerms = player.addAttachment(plugin);
 	}
 	
@@ -109,16 +130,39 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public boolean hasExperienceType(AlfClass.ExperienceType type) {
-		throw new Error("Implement me!");
+		boolean val;
+		try {
+			this.rwl.readLock().lock();
+			val = (this.alfClass.hasExperienceType(type)) || 
+					(this.secondClass != null && this.secondClass.hasExperienceType(type));
+		} finally {
+			this.rwl.readLock().unlock();
+		}
+		return val;
 	}
 	
 	/**
 	 * Whether this Alf can gain an experience type.
+	 * Non-specific to primary or secondary class.
 	 * @param type
 	 * @return
 	 */
 	public boolean canGain(AlfClass.ExperienceType type) {
-		throw new Error("Implement me!");
+		if (type == AlfClass.ExperienceType.ADMIN)
+			return true;
+		boolean prim = false;
+		this.rwl.readLock().lock();
+		//Determine whether the primary class can gain the experience.
+		if (this.alfClass.hasExperienceType(type))
+			prim = (! isMaster(this.alfClass) || (Properties.padMaxLevel && 
+					getExperience(this.alfClass) < Properties.maxExp - 1));
+		boolean prof = false;
+		//Determine whether the secondary class can gain the experience.
+		if (this.secondClass != null && this.secondClass.hasExperienceType(type))
+			prof = ! isMaster(this.secondClass) || (Properties.padMaxLevel && 
+					(getExperience(this.secondClass) < Properties.maxExp - 1));
+		this.rwl.readLock().unlock();
+		return prim || prof;
 	}
 	
 	/**
@@ -127,7 +171,28 @@ public class Alf extends CharacterTemplate {
 	 * @param skillName
 	 */
 	public void bind(Material material, String[] skillName) {
-		throw new Error("Implement me!");
+		if (material != Material.AIR && material != null) {
+			this.binds.put(material, skillName);
+		}
+	}
+	
+	/**
+	 * Change this Alf's class.
+	 * @param alfClass
+	 * @param secondary - whether the class is a secondary type.
+	 */
+	public void changeAlfClass(AlfClass alfClass, boolean secondary) {
+		//Clear all statuses.
+		clearEffects(); //Can this be abused?
+		clearSummons();
+		clearBinds();
+		setAlfClass(alfClass, secondary);
+		//If prefixes are enabled...
+		if (AlfCore.properties.prefixClassName)
+			this.player.setDisplayName("[" + getAlfClass().getName() + "]" + 
+				this.player.getName());
+		this.plugin.getCharacterManager().performSkillChecks(this);
+		getTieredLevel(true);
 	}
 	
 	/**
@@ -156,7 +221,9 @@ public class Alf extends CharacterTemplate {
 	 * Clear summons for this Alf.
 	 */
 	public void clearSummons() {
-		throw new Error("Implement me!");
+		for (Monster summon : this.summons)
+			summon.getEntity().remove();
+		this.summons.clear();
 	}
 	
 	/**
@@ -179,12 +246,56 @@ public class Alf extends CharacterTemplate {
 
 	/**
 	 * Add experience to a specific AlfClass type from a location.
+	 * Only called through GM use.
 	 * @param expChange
 	 * @param ac
 	 * @param loc
 	 */
 	public void addExp(double expChange, AlfClass ac, Location loc) {
-		throw new Error("Implement me!");
+		double exp = getExperience(ac) + expChange;
+		if (exp < 0.0D)
+			exp = 0.0D;
+		int currentLevel = getLevel(ac);
+		setExperience(ac, exp);
+		
+		//Call an event.
+		ExperienceChangeEvent expEvent = new ExperienceChangeEvent(this, ac, expChange, 
+				AlfClass.ExperienceType.ADMIN, loc);
+		this.plugin.getServer().getPluginManager().callEvent(expEvent);
+		
+		//Sync the experience.
+		syncExperience();
+		int newLevel = Properties.getLevel(exp);
+		//If the player changed level...
+		if (currentLevel != newLevel) {
+			//Call a change level event.
+			AlfChangeLevelEvent aLEvent = new AlfChangeLevelEvent(this, ac, currentLevel, newLevel);
+			this.plugin.getServer().getPluginManager().callEvent(aLEvent);
+			
+			//If the new level surpasses the maximum level. 
+			if (newLevel >= ac.getMaxLevel()) {
+				setExperience(ac, Properties.getTotalExp(ac.getMaxLevel()));
+				Messaging.broadcast(this.plugin, "$1 has become a master $2!", new Object[] {
+						this.player.getName(), ac.getName()
+				});
+			} if (newLevel > currentLevel) {
+				Messaging.send(this.player, "You gained a level! (Lvl $1 $2)", new Object[] {
+						newLevel, ac.getName()});
+				setHealth(getMaxHealth());
+				if (this.player.getFoodLevel() < 20)
+					this.player.setFoodLevel(20);
+				this.player.setExhaustion(0);
+				syncHealth();
+				getTieredLevel(true);
+			} else {
+				if (getHealth() > getMaxHealth()) {
+					setHealth(getMaxHealth());
+					syncHealth();
+				}
+				Messaging.send(this.player, "You just lost a level! (Lvl $1 $2)",
+						new Object[] { newLevel, ac.getName() });
+			}
+		}
 	}
 	
 	/**
@@ -194,7 +305,96 @@ public class Alf extends CharacterTemplate {
 	 * @param loc
 	 */
 	public void gainExp(double expChange, AlfClass.ExperienceType source, Location loc) {
-		throw new Error("Implement me!");
+		if (this.player.getGameMode() == GameMode.SURVIVAL) {
+			Properties prop = AlfCore.properties;
+			AlfClass[] classes = { getAlfClass(), getSecondClass() };
+			//Iterate through both primary and secondary classes and add exp where necessary.
+			for (AlfClass ac : classes) {
+				if (ac != null) {
+					if (source == AlfClass.ExperienceType.ADMIN || ac.hasExperienceType(source)) {
+						double gainedExp = expChange;
+						double exp = getExperience(ac);
+						
+						//Grant experience with mod only if it's positive and granted through ordinary means.
+						if (gainedExp > 0.0D && source != AlfClass.ExperienceType.ADMIN)
+							gainedExp *= ac.getExpModifier();
+						//If experience gain is of ordinary means and the player has Mastered this class.
+						else if (source != AlfClass.ExperienceType.ADMIN && source != AlfClass.ExperienceType.ENCHANTING &&
+								isMaster(ac) && ! prop.levelsViaExpLoss) {
+							return;
+						}
+						//Call the experience change event.
+						ExperienceChangeEvent expEvent = new ExperienceChangeEvent(this, ac, gainedExp, source, loc);
+						this.plugin.getServer().getPluginManager().callEvent(expEvent);
+						
+						//If the event isn't cancelled, continue.
+						if (expEvent.isCancelled())
+							return;
+						
+						gainedExp = expEvent.getExpChange();
+						int currentLevel = Properties.getLevel(exp);
+						int newLevel = Properties.getLevel(exp + gainedExp);
+						
+						if (isMaster(ac) && currentLevel > newLevel && ! prop.levelsViaExpLoss && 
+								source != AlfClass.ExperienceType.ADMIN && source != AlfClass.ExperienceType.ENCHANTING) {
+							gainedExp = Properties.getTotalExp(currentLevel) - (exp - 1.0D);
+						} else if (isMaster(ac) && newLevel > currentLevel) {
+							gainedExp = 0.0D;
+							continue;
+						}
+						
+						exp += gainedExp;
+						if (exp < 0.0D) {
+							gainedExp = -exp;
+							exp = 0.0D;
+						} else if (exp > Properties.maxExp) {
+							exp = Properties.maxExp;
+						}
+						
+						//Get the new level.
+						newLevel = Properties.getLevel(exp);
+						setExperience(ac, exp);
+						
+						if (gainedExp != 0.0D) {
+							if (isVerbose() && gainedExp > 0.0D)
+								Messaging.send(this.player, "$1: Gained $2 Exp", new Object[] { ac.getName(),
+										decFormat.format(gainedExp) });
+							else if (isVerbose() && gainedExp < 0.0D)
+								Messaging.send(this.player, "$1: Lost $2 Exp", new Object[] { ac.getName(),
+										decFormat.format(- gainedExp) });
+							if (newLevel != currentLevel && newLevel <= ac.getMaxLevel()) {
+								AlfChangeLevelEvent aLEvent = new AlfChangeLevelEvent(this, ac, currentLevel, newLevel);
+								this.plugin.getServer().getPluginManager().callEvent(aLEvent);
+								
+								if (newLevel == ac.getMaxLevel())
+									Messaging.broadcast(this.plugin, "$1 has become a master $2!", new Object[] {
+											this.player.getName(), ac.getName() });
+								
+								if (newLevel > currentLevel) {
+									Messaging.send(this.player, "You gained a level! (Lvl $1 $2)", new Object[] {
+											newLevel, ac.getName() });
+									if (getHealth() > 0) {
+										setHealth(getMaxHealth());
+										setMana(getMaxMana());
+										if (this.player.getFoodLevel() < 20)
+											this.player.setFoodLevel(20);
+										this.player.setSaturation(1.0F);
+										this.player.setExhaustion(0.0F);
+										syncHealth();
+									}
+									getTieredLevel(true);
+								} else Messaging.send(this.player, "You just lost a level! (Lvl $1 $2)", new Object[] {
+										newLevel, ac.getName() });
+							}
+						}
+						if (newLevel != currentLevel)
+							this.plugin.getCharacterManager().saveAlf(this, false);
+						
+					}
+				}
+			}
+		}
+		syncExperience();
 	}
 	
 	/**
@@ -203,7 +403,7 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public double currentEXPToNextLevel(AlfClass ac) {
-		throw new Error("Implement me!");
+		return getExperience(ac) - Properties.getTotalExp(getLevel(ac));
 	}
 	
 	/**
@@ -213,7 +413,25 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	protected double calculateEXPLoss(double multiplier, AlfClass ac) {
-		throw new Error("Implement me!");
+		//Get the amount of exp needed for the next level.
+		double expForNext = Properties.getExp(getLevel(ac) + 1);
+		//Get the percentage of current exp of the total exp needed.
+		double currentPercent = currentEXPToNextLevel(ac) / expForNext;
+		
+		if (currentPercent >= multiplier)
+			return expForNext * multiplier;
+		//Amount of experience required.
+		double amt = expForNext * currentPercent;
+		multiplier -= currentPercent;
+		
+		//Iterate through all of a player's levels 
+		for (int i = 0; getLevel(ac) - i > 1; i++) {
+			if (1.0D >= multiplier)
+				return amt += Properties.getExp(getLevel(ac) - i) * multiplier;
+			amt += Properties.getExp(getLevel(ac) - i);
+			multiplier -= 1.0D;
+		}
+		return amt;
 	}
 	
 	/**
@@ -222,7 +440,84 @@ public class Alf extends CharacterTemplate {
 	 * @param pvp - whether the death was from pvp
 	 */
 	public void loseExpFromDeath(double multiplier, boolean pvp) {
-		throw new Error("Implement me!");
+		if (this.player.getGameMode() == GameMode.SURVIVAL && multiplier > 0.0D) {
+			Properties prop = AlfCore.properties;
+			AlfClass classes[] = { getAlfClass(), getSecondClass() };
+			if (prop.resetOnDeath) { //TODO Allow players in Hardcore Duels...
+				clearExperience();
+				setAlfClass(null, true);
+				setAlfClass(this.plugin.getClassManager().getDefaultClass(), false);
+				Messaging.send(this.player, "You've lost all your experience and have been reset to $1 for dying!",
+						new Object[] { this.plugin.getClassManager().getDefaultClass().getName() });
+				this.plugin.getCharacterManager().saveAlf(this, false);
+				syncExperience();
+				return;
+			}
+			for (AlfClass ac : classes) {
+				if (ac != null) {
+					double mult = multiplier;
+					if (pvp && ac.getPvpExpLoss() != -1.0D)
+						mult = ac.getPvpExpLoss();
+					else if (! pvp && ac.getExpLoss() != -1.0D)
+						mult = ac.getExpLoss();
+					
+					int currentLvl = getLevel(ac);
+					double currentExp = getExperience(ac);
+					double currentLvlExp = Properties.getTotalExp(currentLvl);
+					double gainedExp = -calculateEXPLoss(mult, ac);
+					
+					//If levels can't be lost via exp loss, set the current exp to the level's minimum.
+					if (gainedExp + currentExp < currentLvlExp && ! prop.levelsViaExpLoss)
+						gainedExp = -(currentExp - currentLvlExp);
+				
+					//Call the event.
+					ExperienceChangeEvent expEvent = new ExperienceChangeEvent(this, ac, gainedExp,
+							AlfClass.ExperienceType.DEATH, this.player.getLocation());
+					this.plugin.getServer().getPluginManager().callEvent(expEvent);
+					if (expEvent.isCancelled())
+						return;
+					//Update gainedExp in case the event was modified.
+					gainedExp = expEvent.getExpChange();
+					
+					int newLevel = Properties.getLevel(currentExp + gainedExp);
+					if (! isMaster(ac) || prop.masteryLoss) {
+						if (currentLvl > newLevel && ! prop.levelsViaExpLoss)
+							gainedExp = currentLvlExp - (currentExp - 1.0D);
+						double newExp = currentExp + gainedExp;
+						
+						//Don't go under zero.
+						if (newExp < 0.0D) {
+							gainedExp = -currentExp;
+							newExp = 0.0D;
+						}
+						
+						//Get the new level and update experience.
+						newLevel = Properties.getLevel(newExp);
+						setExperience(ac, newExp);
+						
+						//If experience has changed.
+						if (gainedExp != 0.0D) {
+							if (isVerbose() && gainedExp < 0.0D)
+								Messaging.send(this.player, "$1: Lost $2 Exp", new Object[] { ac.getName(), 
+									decFormat.format(- gainedExp) });
+							if (newLevel != currentLvl) {
+								AlfChangeLevelEvent aLEvent = new AlfChangeLevelEvent(this, ac, currentLvl, newLevel);
+								this.plugin.getServer().getPluginManager().callEvent(aLEvent);
+								if (newLevel >= ac.getMaxLevel()) {
+									setExperience(ac, Properties.getTotalExp(ac.getMaxLevel()));
+									Messaging.broadcast(this.plugin, "$1 has become a master $2!", new Object[] {
+										this.player.getName(), ac.getName() });
+								}
+								Messaging.send(this.player, "You lost a level! (Lvl $1 $2)", new Object[] {
+									newLevel, ac.getName() });
+							}
+						}
+					}
+				}
+			}
+			this.plugin.getCharacterManager().saveAlf(this, false);
+			syncExperience();
+		}
 	}
 	
 	/**
@@ -255,7 +550,7 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public Long getCooldown(String name) {
-		throw new Error("Implement me!");
+		return this.cooldowns.get(name.toLowerCase());
 	}
 	
 	/**
@@ -263,7 +558,7 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public Map<String, Long> getCooldowns() {
-		throw new Error("Implement me!");
+		return Collections.unmodifiableMap(this.cooldowns);
 	}
 	
 	/**
@@ -311,8 +606,16 @@ public class Alf extends CharacterTemplate {
 	 * Get the max health of this Alf.
 	 */
 	public int getMaxHealth() {
-		//TODO
-		return 100;
+		AlfClass alfClass = getAlfClass();
+		int level = Properties.getLevel(getExperience(alfClass));
+		int primaryHP = alfClass.getBaseMaxHealth() + (int)((level - 1) * alfClass.getMaxHealthPerLevel());
+		int secondHP = 0;
+		AlfClass secondClass = getSecondClass();
+		if (secondClass != null) {
+			level = Properties.getLevel(getExperience(secondClass));
+			secondHP = secondClass.getBaseMaxHealth() + (int)((level - 1) * secondClass.getMaxHealthPerLevel());
+		}
+		return primaryHP > secondHP ? primaryHP : secondHP;
 	}
 	
 	/**
@@ -320,8 +623,16 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public int getMaxMana() {
-		//TODO
-		return 100;
+		AlfClass alfClass = getAlfClass();
+		int level = Properties.getLevel(getExperience(alfClass));
+		int primaryMana = alfClass.getBaseMaxMana() + (int)((level - 1) * alfClass.getMaxManaPerLevel());
+		int secondMana = 0;
+		AlfClass secondClass = getSecondClass();
+		if (secondClass != null) {
+			level = Properties.getLevel(getExperience(secondClass));
+			secondMana = secondClass.getBaseMaxMana() + (int)((level - 1) * secondClass.getMaxManaPerLevel());
+		}
+		return primaryMana > secondMana ? primaryMana : secondMana;
 	}
 	
 	/**
@@ -337,7 +648,16 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public int getManaRegen() {
-		throw new Error("Implement me!");
+		AlfClass alfClass = getAlfClass();
+		int level = Properties.getLevel(getExperience(alfClass));
+		double primaryMana = alfClass.getManaRegen() + (level - 1) * alfClass.getManaRegenPerLevel();
+		double secondMana = 0.0D;
+		AlfClass secondClass = getSecondClass();
+		if (secondClass != null) {
+			level = Properties.getLevel(getExperience(secondClass));
+			secondMana = secondClass.getManaRegen() + (level - 1) * secondClass.getManaRegenPerLevel();
+		}
+		return (int)(primaryMana > secondMana ? primaryMana : secondMana);
 	}
 	
 	/**
@@ -367,7 +687,19 @@ public class Alf extends CharacterTemplate {
 	 * Get the skill settings.
 	 */
 	public Map<String, ConfigurationSection> getSkillSettings() {
-		throw new Error("Implement me!");
+		return Collections.unmodifiableMap(this.persistedSkillSettings);
+	}
+	
+	/**
+	 * Get the skill setting for a specific skill type.
+	 * @param skillName
+	 * @return
+	 */
+	public ConfigurationSection getSkillSettings(String skillName) {
+		AlfClass secondClass = getSecondClass();
+		if (! getAlfClass().hasSkill(skillName) && (secondClass == null || ! secondClass.hasSkill(skillName)))
+				return null;
+		return (ConfigurationSection) this.persistedSkillSettings.get(skillName.toLowerCase());
 	}
 	
 	/**
@@ -398,7 +730,22 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public int getSkillLevel(Skill skill) {
-		throw new Error("Implement me!");
+		int level = -1, secondLevel = -1;
+		AlfClass alfClass = getAlfClass();
+		if (alfClass.hasSkill(skill.getName())) {
+			int requiredLevel = SkillConfigManager.getSetting(alfClass, skill, Setting.LEVEL.node(), 1);
+			level = getLevel(alfClass);
+			if (level < requiredLevel)
+				level = -1;
+		}
+		AlfClass secondClass = getSecondClass();
+		if (secondClass != null && secondClass.hasSkill(skill.getName())) {
+			int requiredLevel = SkillConfigManager.getSetting(secondClass, skill, Setting.LEVEL.node(), 1);
+			secondLevel = getLevel(secondClass);
+			if (secondLevel < requiredLevel)
+				secondLevel = -1;
+		}
+		return secondLevel > level ? secondLevel : level;
 	}
 	
 	/**
@@ -411,11 +758,71 @@ public class Alf extends CharacterTemplate {
 	}
 	
 	/**
+	 * Get the tiered level of this Alf.
+	 * @param recache
+	 * @return
+	 */
+	public int getTieredLevel(boolean recache) {
+		if (this.tieredLevel != null && ! recache)
+			return this.tieredLevel;
+		AlfClass alfClass = getAlfClass();
+		AlfClass secondClass = getSecondClass();
+		
+		if (secondClass == null)
+			this.tieredLevel = getTieredLevel(alfClass);
+		else {
+			int ac = getTieredLevel(alfClass);
+			int sc = getTieredLevel(secondClass);
+			this.tieredLevel = ac > sc ? ac : sc;
+		}
+		return this.tieredLevel;
+	}
+	
+	/**
+	 * Get the tiered level (Sum of Levels) for an Alf Class and its tiers.
+	 * @param alfClass
+	 * @return
+	 */
+	public int getTieredLevel(AlfClass alfClass) {
+		if (alfClass.hasNoParents())
+			return getLevel(alfClass);
+		
+		Set<AlfClass> classes = new HashSet<AlfClass>();
+		for (AlfClass aClass : alfClass.getParents()) {
+			if (isMaster(aClass)) {
+				classes.addAll(getTieredLevel(aClass, new HashSet<AlfClass>(classes)));
+				classes.add(aClass);
+			}
+		}
+		int level = getLevel(alfClass);
+		for (AlfClass aClass : classes)
+			if (aClass.getTier() != 0)
+				level += getLevel(aClass);
+		return level;
+	}
+	
+	/**
+	 * Get a set of all the tiers of an AlfClass.
+	 * @param alfClass
+	 * @param classes
+	 * @return
+	 */
+	private Set<AlfClass> getTieredLevel(AlfClass alfClass, Set<AlfClass> classes) {
+		for (AlfClass aClass : alfClass.getParents()) {
+			if (isMaster(aClass)) {
+				classes.addAll(getTieredLevel(aClass, new HashSet<AlfClass>(classes)));
+				classes.add(aClass);
+			}
+		}
+		return classes;
+	}
+	
+	/**
 	 * Get the Alf's summons.
 	 * @return
 	 */
 	public Set<Monster> getSummons() {
-		throw new Error("Implement me!");
+		return this.summons;
 	}
 	
 	/**
@@ -423,7 +830,7 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public Set<String> getSuppressedSkills() {
-		throw new Error("Implement me!");
+		return this.suppressedSkills.keySet();
 	}
 	
 	/**
@@ -480,7 +887,13 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public boolean canPrimaryUseSkill(Skill skill) {
-		throw new Error("Implement me!");
+		AlfClass alfClass = getAlfClass();
+		if (alfClass.hasSkill(skill.getName())) {
+			int level = SkillConfigManager.getSetting(alfClass, skill, Setting.LEVEL.node(), 1);
+			if (getLevel(alfClass) >= level)
+				return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -489,7 +902,13 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public boolean canSecondUseSkill(Skill skill) {
-		throw new Error("Implement me!");
+		AlfClass secondClass = getSecondClass();
+		if (secondClass != null && secondClass.hasSkill(skill.getName())) {
+			int level = SkillConfigManager.getSetting(secondClass, skill, Setting.LEVEL.node(), 1);
+			if (getLevel(secondClass) >= level)
+				return true;
+		}
+		return false;
 	}
 	
 	public boolean hasAccessToSkill(Skill skill) {
@@ -522,7 +941,7 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public boolean isSuppressing(Skill skill) {
-		throw new Error("Implement me!");
+		return this.suppressedSkills.containsKey(skill.getName());
 	}
 	
 	/**
@@ -538,7 +957,7 @@ public class Alf extends CharacterTemplate {
 	 * @return
 	 */
 	public DelayedSkill getDelayedSkill() {
-		throw new Error("Implement me!");
+		return this.delayedSkill;
 	}
 	
 	/**
@@ -546,14 +965,20 @@ public class Alf extends CharacterTemplate {
 	 * @param wSkill
 	 */
 	public void setDelayedSkill(DelayedSkill wSkill) {
-		throw new Error("Implement me!");
+		this.delayedSkill = wSkill;
 	}
 	
 	/**
 	 * Cancel the pending delayed skill.
 	 */
 	public void cancelDelayedSkill() {
-		throw new Error("Implement me!");
+		if (this.delayedSkill != null) {
+			Skill skill = this.delayedSkill.getSkill();
+			this.delayedSkill = null;
+			skill.broadcast(this.player.getLocation(), "$1 has stopped using $2!", new Object[] {
+				this.player.getDisplayName(), skill.getName()
+			});
+		}
 	}
 	
 	/**
@@ -561,7 +986,7 @@ public class Alf extends CharacterTemplate {
 	 * @param name
 	 */
 	public void removeCooldown(String name) {
-		throw new Error("Implement me!");
+		this.cooldowns.remove(name.toLowerCase());
 	}
 	
 	/**
@@ -596,7 +1021,7 @@ public class Alf extends CharacterTemplate {
 	 * @param cooldown
 	 */
 	public void setCooldown(String name, long cooldown) {
-		throw new Error("Implement me!");
+		this.cooldowns.put(name.toLowerCase(), cooldown);
 	}
 	
 	/**
@@ -671,7 +1096,12 @@ public class Alf extends CharacterTemplate {
 	}
 	
 	public void setSkillSetting(String skillName, String node, Object val) {
-		throw new Error("Implement me!");
+		ConfigurationSection section = this.persistedSkillSettings.get(skillName.toLowerCase());
+		if (section == null) {
+			section = new MemoryConfiguration();
+			this.persistedSkillSettings.put(skillName.toLowerCase(), section);
+		}
+		section.set(node, val);
 	}
 	
 	/**
@@ -680,15 +1110,19 @@ public class Alf extends CharacterTemplate {
 	 * @param suppressed
 	 */
 	public void setSuppressed(Skill skill, boolean suppressed) {
-		throw new Error("Implement me!");
+		if (suppressed)
+			this.suppressedSkills.put(skill.getName(), true);
+		else
+			this.suppressedSkills.remove(skill.getName());
 	}
 	
 	/**
 	 * Set the suppressed skills for this Alf.
 	 * @param suppressedSkills
 	 */
-	public void setSuppresedSkills(Collection<String> suppressedSkills) {
-		throw new Error("Implement me!");
+	public void setSuppressedSkills(Collection<String> suppressedSkills) {
+		for (String s : suppressedSkills)
+			this.suppressedSkills.put(s, true);
 	}
 
 	/**
@@ -795,7 +1229,7 @@ public class Alf extends CharacterTemplate {
 	 * Reset the combat effect.
 	 */
 	public void resetCombatEffect() {
-//		addEffect(this.combat);
+		addEffect(this.combat);
 	}
 	
 	/**

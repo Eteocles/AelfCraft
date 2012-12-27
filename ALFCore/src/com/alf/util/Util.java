@@ -110,7 +110,7 @@ public class Util {
 		 Integer newVal = toInt(val);
 		 if (newVal == null)
 			 throw new IllegalArgumentException(name + " must be a numeral!");
-		 return newVal.intValue();
+		 return newVal;
 	 }
 
 	 /** Convert parameter to a Double. Handles non-numeral case. */
@@ -118,7 +118,7 @@ public class Util {
 		 Double newVal = toDouble(val);
 		 if (newVal == null)
 			 throw new IllegalArgumentException(name + " must be a numeral!");
-		 return newVal.doubleValue();
+		 return newVal;
 	 }
 	 
 	 static {
