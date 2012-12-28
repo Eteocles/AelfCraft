@@ -1,7 +1,6 @@
 package com.alf.chararacter;
 
 import java.util.Collection;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,7 +51,7 @@ public class ManaUpdater implements Runnable {
 					if (! hrmEvent.isCancelled()) {
 						alf.setMana(mana + hrmEvent.getAmount());
 						if (alf.isVerbose()) {
-							AlfCore.log(Level.INFO, "Updating Mana Display.");
+//							AlfCore.log(Level.INFO, "Updating Mana Display.");
 							Messaging.send(alf.getPlayer(), ChatColor.BLUE + "MANA " + Messaging.createManaBar(alf.getMana(), alf.getMaxMana()), new Object[0]);
 						}
 					}

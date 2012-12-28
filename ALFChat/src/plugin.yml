@@ -21,3 +21,4 @@ permissions:
   alfchat.*:
     description: Gives access to administration commands for AlfChat
     children:
+      alfchat.filter.bypass: false

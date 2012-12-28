@@ -30,6 +30,8 @@ public class ChatManager {
 	private ChPlayerStorage playerStorage;
 	//Filtered words.
 	private Set<String> bannedPhrases;
+	//
+	private List<String> censors;
 	//Threshold for caps limit.
 	private static double CAPS_THRESHOLD = 100;
 	//Number of milliseconds between slow-chat messages.
@@ -319,6 +321,7 @@ public class ChatManager {
 	
 	public void loadFilters(Configuration config) {
 		this.bannedPhrases = new HashSet<String>(config.getStringList("banned-phrases"));
+		this.censors = config.getStringList("censor-replacements");
 	}
 	
 	/**
@@ -402,17 +405,24 @@ public class ChatManager {
 				numCaps++;
 		}
 		capsPercentage = numCaps / message.length();
+		if (capsPercentage >= CAPS_THRESHOLD)
+			message = message.toLowerCase();
 		
 		boolean censored = false;
+		
 		//Check for profanity.
+		String trimmedMessage = message.replaceAll("\\W", "").toLowerCase();
 		for (String s : bannedPhrases) {
-			if (message.toLowerCase().contains(s)) {
-				message = message.replaceAll("(?i)"+s, s.substring(0, 1) + "****");
+			if (trimmedMessage.contains(s)) {
+				message = this.censors.get((int)(Math.random() * censors.size()));		
 				censored = true;
+				break;
 			}
 		}
 		
 		if (capsPercentage >= CAPS_THRESHOLD || censored) {
+			if (player.getPlayer().hasPermission("alfchat.filter.bypass") || player.getPlayer().isOp())
+				return message;
 			player.setSlow(true);
 			Messaging.send(player.getPlayer(), "Watch your tongue! Slow chat mode enabled for " + SLOW_LENGTH/1000L + " seconds!", new Object[0],
 					ChatColor.RED);

@@ -2,7 +2,9 @@ package com.alf.util;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +35,14 @@ public class Util {
 	public static final List<String> weapons;
 	public static final List<String> armors;
 	public static final List<String> tools;
+	
+	public static final HashMap<String, Location> deaths = new LinkedHashMap<String, Location>() {
+		private static final long serialVersionUID = -5160276589164566330L;
+		private static final int MAX_ENTRIES = 50;
+		protected boolean removeEldestEntry(Map.Entry<String, Location> eldest) {
+			return size() > MAX_ENTRIES;
+		}
+	};
 
 	/**
 	 * Move an item in an Alf's inventory from a slot.

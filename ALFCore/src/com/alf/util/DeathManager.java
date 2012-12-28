@@ -20,7 +20,7 @@ public class DeathManager {
 	private Map<String, PlayerInventoryStorage> deathInventories = new HashMap<String, PlayerInventoryStorage>();
 	private Map<String, Integer> taskIds = new HashMap<String, Integer>();
 	//Timeout length before a queued Alf's inventory is removed.
-	private static final long STORAGE_TIMEOUT = 300000L;
+	private static final long STORAGE_TIMEOUT = 3000L;
 	
 	/**
 	 * Constructs the Death Manager.

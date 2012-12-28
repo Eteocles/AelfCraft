@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -23,6 +24,7 @@ import org.bukkit.inventory.PlayerInventory;
 import com.alf.AlfCore;
 import com.alf.chararacter.Alf;
 import com.alf.chararacter.CharacterManager;
+import com.alf.chararacter.classes.AlfClass;
 import com.alf.chararacter.effect.CombatEffect;
 import com.alf.command.Command;
 import com.alf.util.DeathManager;
@@ -152,6 +154,22 @@ public class APlayerListener implements Listener {
 				alf.syncExperience();
 			}
 		}, 20L);
+	}
+	
+	/**
+	 * Handle Player Exp Change.
+	 * @param event
+	 */
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onPlayerExpChange(PlayerExpChangeEvent event) {
+		int amount = event.getAmount();
+		if (amount != 0) {
+			Alf alf = this.plugin.getCharacterManager().getAlf(event.getPlayer());
+			if (amount < 0)
+				alf.gainExp(event.getAmount(), AlfClass.ExperienceType.EXTERNAL, alf.getViewingLocation(1.0D));
+		}
+		//Suppress regular exp gain.
+		event.setAmount(0);
 	}
 	
 }

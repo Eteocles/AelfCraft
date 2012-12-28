@@ -72,7 +72,7 @@ public class Messaging {
 		for (int i = 0; i < 50 - progress; i++)
 			manaBar += '|';
 		manaBar += ChatColor.RED + "]";
-		return manaBar + " - " + ChatColor.BLUE + "%";
+		return manaBar + " - " + ChatColor.BLUE + percent + "%";
 	}
 	
 	public static String getLivingEntityName(CharacterTemplate character) {
