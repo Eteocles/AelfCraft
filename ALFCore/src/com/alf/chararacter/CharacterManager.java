@@ -173,7 +173,7 @@ public class CharacterManager {
 		}
 		alf = this.alfStorage.loadAlf(p);
 		addAlf(alf);
-//TODO		performSkillChecks(alf);
+		performSkillChecks(alf);
 		AlfCore.debug.stopTask("AlfManager.getAlf");
 		return alf;
 	}

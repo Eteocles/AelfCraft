@@ -9,8 +9,10 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
+import com.alf.chararacter.Alf;
 import com.alf.chararacter.CharacterDamageManager;
 import com.alf.chararacter.CharacterManager;
+import com.alf.chararacter.classes.AlfClass;
 import com.alf.chararacter.classes.AlfClassManager;
 import com.alf.chararacter.effect.EffectManager;
 import com.alf.chararacter.party.PartyManager;
@@ -18,6 +20,8 @@ import com.alf.command.CommandHandler;
 import com.alf.command.commands.HelpCommand;
 import com.alf.listener.AEntityListener;
 import com.alf.listener.APlayerListener;
+import com.alf.skill.OutsourcedSkill;
+import com.alf.skill.Skill;
 import com.alf.skill.SkillConfigManager;
 import com.alf.skill.SkillManager;
 import com.alf.util.ConfigManager;
@@ -204,11 +208,21 @@ public class AlfCore extends AlfPlugin {
 	/**
 	 * Handle setup after first stage of enabling.
 	 */
-	@SuppressWarnings("unused")
 	public void postSetup() {
 		Player players[] = getServer().getOnlinePlayers();
 		for (Player p : players) {
-			//TODO Handle inventory checking and class checking.
+			Alf alf = this.characterManager.getAlf(p);
+			AlfClass alfClass = alf.getAlfClass();
+			
+			//Set to default class if permissions are invalid.
+			if (alfClass != this.classManager.getDefaultClass() && ! perms.has(p,
+					"alfcore.classes."+alfClass.getName().toLowerCase())) {
+				alf.setAlfClass(this.classManager.getDefaultClass(), false);
+			}
+			for (Skill skill : this.skillManager.getSkills())
+				if (skill instanceof OutsourcedSkill)
+					((OutsourcedSkill)skill).tryLearningSkill(alf);
+			this.characterManager.getAlf(p).checkInventory();
 		}
 	}
 

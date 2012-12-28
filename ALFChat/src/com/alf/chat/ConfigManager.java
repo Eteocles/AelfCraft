@@ -59,7 +59,7 @@ public class ConfigManager {
 		}
 		
 		this.plugin.getChatManager().loadChannels(channelConfig);
-		
+		this.plugin.getChatManager().loadFilters(filterConfig);
 		return true;
 	}
 	

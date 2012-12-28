@@ -14,6 +14,7 @@ import com.alf.api.event.AlfLeaveCombatEvent;
 import com.alf.chararacter.Alf;
 import com.alf.chararacter.Monster;
 import com.alf.util.Messaging;
+import com.alf.util.Properties;
 
 /**
  * Applied when a player enters combat.
@@ -56,7 +57,7 @@ public class CombatEffect extends PeriodicEffect {
 	 * @param plugin
 	 */
 	public CombatEffect(AlfCore plugin) {
-		super(plugin, "Combat", AlfCore.properties.combatTime);
+		super(plugin, "Combat", Properties.combatTime);
 	}
 	
 	/**

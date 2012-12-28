@@ -32,6 +32,9 @@ public class ChatManager {
 	private Set<String> bannedPhrases;
 	//Threshold for caps limit.
 	private static double CAPS_THRESHOLD = 100;
+	//Number of milliseconds between slow-chat messages.
+	public static long SLOW_INTERVAL = 15000L;
+	public static long SLOW_LENGTH = 300000L;
 	
 	private static String DEFAULT_CHANNEL;
 	private static String GUEST_CHANNEL;
@@ -314,6 +317,10 @@ public class ChatManager {
 		return availableChannels;
 	}
 	
+	public void loadFilters(Configuration config) {
+		this.bannedPhrases = new HashSet<String>(config.getStringList("banned-phrases"));
+	}
+	
 	/**
 	 * Load channels from configuration.
 	 * @param config
@@ -407,7 +414,9 @@ public class ChatManager {
 		
 		if (capsPercentage >= CAPS_THRESHOLD || censored) {
 			player.setSlow(true);
-			//Get the Alf representation from AlfCore and lower karma.
+			Messaging.send(player.getPlayer(), "Watch your tongue! Slow chat mode enabled for " + SLOW_LENGTH/1000L + " seconds!", new Object[0],
+					ChatColor.RED);
+			//TODO Get the Alf representation from AlfCore and lower karma.
 		}
 		
 		return message;

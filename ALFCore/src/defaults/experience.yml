@@ -1,0 +1,89 @@
+fishing: 5
+farming:
+    crops: 1
+    sugar_cane_block: 1
+    melon_block: 2
+    pumpkin: 2
+    pumpkin_stem: .2
+    melon_stem: .2
+    vine: .2
+    huge_mushroom_1: .1
+    huge_mushroom_2: .1
+    red_mushroom: 1
+    brown_mushroom: 1
+    long_grass: .1
+    red_rose: .1
+    yellow_flower: .1
+    water_lily: .1
+    nether_warts: .1
+    potato: 1
+    carrot: 1
+breeding:
+    Chicken: 1
+    Cow: 1
+    MushroomCow: 2
+    Pig: 1
+    Sheep: 1
+killing:
+    Chicken: 1
+    Cow: 1
+    Creeper: 23
+    Ghast: 50
+    Giant: 300
+    Pig: 1
+    PigZombie: 20
+    Sheep: 1
+    Skeleton: 22
+    Ozelot: 1
+    Slime: 15
+    Spider: 18
+    Squid: 1
+    Zombie: 15
+    Wolf: 6
+    CaveSpider: 20
+    Enderman: 50
+    EnderDragon: 500
+    Silverfish: 8
+    Villager: 1
+    Blaze: 25
+    MushroomCow: 1
+    LavaSlime: 12
+    SnowMan: 5
+    VillagerGolem: 25
+    Bat: 6
+    Witch: 50
+    WitherBoss: 500
+    WitherSkull: 30
+player-killing: 31
+mining:
+    coal: 5
+    cobblestone: 1
+    clay: 15
+    diamond_ore: 15
+    dirt: .2
+    glowstone: 5
+    gold_ore: 3
+    coal_ore: 6
+    grass: .2
+    gravel: 1
+    iron_ore: 3
+    lapis_ore: 7
+    mossy_cobblestone: 2
+    netherrack: 1
+    obsidian: 20
+    redstone_ore: 8
+    glowing_redstone_ore: 8
+    sand: .2
+    sandstone: 1
+    snow_block: 1
+    soul_sand: 8
+    stone: .2
+logging:
+    log: 3
+    cactus: 1
+    sapling: .1
+crafting:
+smelting: .75
+engineering: .5
+enchanting: .5
+trading: 1

@@ -132,6 +132,14 @@ public class AlfClass implements Comparable<AlfClass> {
 	}
 	
 	/**
+	 * Add a specialization to this class.
+	 * @param alfClass
+	 */
+	public void addSpecialization(AlfClass alfClass) {
+		this.specializations.add(alfClass);
+	}
+	
+	/**
 	 * Add a class as a strong parent.
 	 */
 	public void addStrongParent(AlfClass parent) throws CircularParentException {

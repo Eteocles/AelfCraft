@@ -20,6 +20,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 
 import com.alf.AlfCore;
 
@@ -44,6 +45,7 @@ public class SkillManager {
 		this.plugin = plugin;
 		this.skills = new LinkedHashMap<String, Skill>();
 		this.identifiers = new HashMap<String, Skill>();
+		this.skillFiles = new HashMap<String, File>();
 		this.dir = new File(plugin.getDataFolder(), "skills");
 		this.dir.mkdir();
 
@@ -117,6 +119,31 @@ public class SkillManager {
 	 */
 	public Collection<Skill> getSkills() {
 		return Collections.unmodifiableCollection(this.skills.values());
+	}
+	
+	/**
+	 * Load an outsourced skill.
+	 * @param name
+	 * @return
+	 */
+	public boolean loadOutsourcedSkill(String name) {
+		if (name == null | this.skills.get(name.toLowerCase()) != null)
+			return true;
+		OutsourcedSkill oSkill = new OutsourcedSkill(this.plugin, name);
+		ConfigurationSection config = SkillConfigManager.outsourcedSkillConfig.getConfigurationSection(
+				oSkill.getName());
+		List<String> perms = new ArrayList<String>();
+		if (config != null)
+			perms = config.getStringList("permissions");
+		if (perms.isEmpty()) {
+			AlfCore.log(Level.SEVERE, "There are no permissions defined for " + oSkill.getName());
+			return false;
+		}
+		oSkill.setPermissions((String[])perms.toArray(new String[perms.size()]));
+		oSkill.setUsage(config.getString("usage"));
+		oSkill.setDescription(config.getString("usage"));
+		this.skills.put(name.toLowerCase(), oSkill);
+		return true;
 	}
 
 	/**

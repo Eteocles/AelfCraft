@@ -1,10 +1,12 @@
 package com.alf.chat;
 
 import java.util.*;
+import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
 import com.alf.chat.channel.ChatChannel;
+import com.alf.util.Messaging;
 
 /**
  * Encapsulates a Player object. 
@@ -20,11 +22,14 @@ public class ChPlayer {
 	
 	/* Slow chat toggle */
 	private boolean slowChat; 
+	private long slowChatStart = -1;
 	
 	//Name
 	private String name;
 	//Player object.
 	private Player player;
+	//Last time of player chat.
+	private long lastChatTime = -1;
 	
 	/**
 	 * Constructs the ChPlayer.
@@ -114,6 +119,10 @@ public class ChPlayer {
 	 * @param slowMode
 	 */
 	public void setSlow(boolean slowMode) {
+		if (slowMode) {
+			this.slowChatStart = System.currentTimeMillis();
+			AlfChat.log(Level.INFO, "Slow Chat Started for Player " + player.getName() + " at time " + this.slowChatStart);
+		}
 		this.slowChat = slowMode;
 	}
 	
@@ -139,6 +148,34 @@ public class ChPlayer {
 	 */
 	public void setChannels(Set<String> channels) {
 		this.channels = channels;
+	}
+	
+	/**
+	 * Get the last chat time.
+	 * @return
+	 */
+	public long getLastChatTime() {
+		return this.lastChatTime;
+	}
+	
+	/**
+	 * Get the time at which slow chat started.
+	 * @return slow chat time or -1 if not in slow chat
+	 */
+	public long getSlowChatStart() {
+		return this.slowChatStart;
+	}
+	
+	/**
+	 * Update the chat time.
+	 */
+	public void updateChatTime() {
+		this.lastChatTime = System.currentTimeMillis();
+		if (slowChat && this.lastChatTime > ChatManager.SLOW_LENGTH + this.slowChatStart) {
+			this.slowChat = false;
+			Messaging.send(this.player, "Slow chat mode disabled.", new Object[0]);
+			slowChatStart = -1;
+		}
 	}
 	
 	/**

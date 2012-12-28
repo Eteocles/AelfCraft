@@ -27,10 +27,10 @@ public abstract class AlfStorage {
 	 * @return - the new alf
 	 */
 	public Alf createNewAlf(Player player) {
-		Alf alf = new Alf(this.plugin, player, null, null);
-		alf.setMana(100);
-		alf.setHealth(100);
-//		alf.syncHealth();
+		Alf alf = new Alf(this.plugin, player, this.plugin.getClassManager().getDefaultClass(), null);
+		alf.setMana(alf.getMaxMana());
+		alf.setHealth(alf.getMaxHealth());
+		alf.syncHealth();
 		return alf;
 	}
 	

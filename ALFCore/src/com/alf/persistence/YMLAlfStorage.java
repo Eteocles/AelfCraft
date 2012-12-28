@@ -2,14 +2,17 @@ package com.alf.persistence;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -57,30 +60,109 @@ public class YMLAlfStorage extends AlfStorage {
 		File pFolder = new File(this.playerFolder, player.getName().toLowerCase().substring(0, 1));
 		pFolder.mkdirs();
 		File playerFile = new File(pFolder, player.getName() + ".yml");
-		
+
 		if (playerFile.exists()) {
 			Configuration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-//			AlfClass playerClass = loadClass(player, playerConfig);
-//			if (playerClass == null) {
-//				AlfCore.log(Level.INFO, "Invalid class found for " + player.getName() + ". Resetting player.");
-//				return createNewAlf(player);
-//			}
-//			AlfClass secondClass = loadSecondaryClass(player, playerConfig);
-			//TODO
-			Alf playerAlf = new Alf(this.plugin, player, null, null);
-			
+			AlfClass playerClass = loadClass(player, playerConfig);
+			if (playerClass == null) {
+				AlfCore.log(Level.INFO, "Invalid class found for " + player.getName() + ". Resetting player.");
+				return createNewAlf(player);
+			}
+			AlfClass secondClass = loadSecondaryClass(player, playerConfig);
+
+			Alf playerAlf = new Alf(this.plugin, player, playerClass, secondClass);
+
+			loadCooldowns(playerAlf, playerConfig.getConfigurationSection("cooldowns"));
+			loadExperience(playerAlf, playerConfig.getConfigurationSection("experience"));
+			loadBinds(playerAlf, playerConfig.getConfigurationSection("binds"));
+			loadSkillSettings(playerAlf, playerConfig.getConfigurationSection("skill-settings"));
 			playerAlf.setMana(playerConfig.getInt("mana", 0));
-			playerAlf.setHealth(playerConfig.getInt("health", 100)); //TODO CHANGE FROM 100
+			playerAlf.setHealth(playerConfig.getInt("health", playerClass.getBaseMaxHealth()));
 			playerAlf.setVerbose(playerConfig.getBoolean("verbose", true));
-//			playerAlf.setSuppresedSkills(playerConfig.getStringList("suppressed"));
-			
+			playerAlf.setSuppressedSkills(playerConfig.getStringList("suppressed"));
+
 			AlfCore.log(Level.INFO, "Loaded alf: " + player.getName() + " with EID: " + player.getEntityId());
 			return playerAlf;
 		}
 		AlfCore.log(Level.INFO, "Created alf: " + player.getName());
 		return createNewAlf(player);
 	}
-	
+
+	/**
+	 * Load skill settings.
+	 * @param alf
+	 * @param section
+	 */
+	private void loadSkillSettings(Alf alf, ConfigurationSection section) {
+		if ((section == null) || (section.getKeys(false) == null))
+			return;
+
+		String skill;
+		ConfigurationSection skillSection;
+
+		//Iterate through all of the skills listed and put settings.
+		for (Iterator<String> it = section.getKeys(false).iterator(); it.hasNext(); ) { 
+			skill = (String)it.next();
+			if (section.isConfigurationSection(skill)) {
+				skillSection = section.getConfigurationSection(skill);
+				for (String key : skillSection.getKeys(true))
+					if (!skillSection.isConfigurationSection(key))
+						alf.setSkillSetting(skill, key, skillSection.get(key)); 
+			} 
+		} 
+	}
+
+	/**
+	 * Load in binds.
+	 * @param alf
+	 * @param section
+	 */
+	private void loadBinds(Alf alf, ConfigurationSection section) {
+		if (section == null)
+			return;
+		Set<String> bindKeys = section.getKeys(false);
+		if ((bindKeys != null) && (bindKeys.size() > 0))
+			for (String material : bindKeys)
+				try {
+					Material item = Material.valueOf(material);
+					String bind = section.getString(material, "");
+					if (bind.length() > 0)
+						alf.bind(item, bind.split(" "));
+				}
+				catch (IllegalArgumentException e) {
+					AlfCore.log(Level.WARNING, new StringBuilder().append(material).append(" isn't a valid Item to bind a Skill to.").toString());
+				}
+	}
+
+	private void loadExperience(Alf playerAlf,
+			ConfigurationSection configurationSection) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * Load cool downs.
+	 * @param alf
+	 * @param section
+	 */
+	private void loadCooldowns(Alf alf, ConfigurationSection section) {
+		if (section == null)
+			return;
+		Set<String> storedCooldowns = section.getKeys(false);
+		long time;
+		if (storedCooldowns != null) {
+			time = System.currentTimeMillis();
+			for (String skillName : storedCooldowns)
+				try {
+					long cooldown = Long.valueOf(section.getString(skillName, "0"));
+
+					if (alf.hasAccessToSkill(skillName) && cooldown > time)
+						alf.setCooldown(skillName, cooldown);
+				}
+				catch (NumberFormatException e) {}
+		}
+	}
+
 	/**
 	 * 
 	 * @param player
@@ -90,7 +172,7 @@ public class YMLAlfStorage extends AlfStorage {
 	public AlfClass loadClass(Player player, Configuration config) {
 		AlfClass playerClass = null;
 		AlfClass defaultClass = this.plugin.getClassManager().getDefaultClass();
-		
+
 		if (config.getString("class") != null) {
 			playerClass = this.plugin.getClassManager().getClass(config.getString("class"));
 			if (playerClass == null)
@@ -102,7 +184,7 @@ public class YMLAlfStorage extends AlfStorage {
 			playerClass = defaultClass;
 		return playerClass;
 	}
-	
+
 	/**
 	 * 
 	 * @param player
@@ -111,7 +193,7 @@ public class YMLAlfStorage extends AlfStorage {
 	 */
 	public AlfClass loadSecondaryClass(Player player, Configuration config) {
 		AlfClass playerClass = null;
-		
+
 		if (config.getString("secondary-class") != null) {
 			playerClass = this.plugin.getClassManager().getClass(config.getString("secondary-class"));
 			if (playerClass == null || ! playerClass.isSecondary()) {
@@ -148,7 +230,7 @@ public class YMLAlfStorage extends AlfStorage {
 		File playerFile = new File(this.playerFolder+File.separator+name.substring(0, 1).toLowerCase(), 
 				name + ".yml");
 		FileConfiguration playerConfig = new YamlConfiguration();
-		
+
 		//Save Alf class.
 		playerConfig.set("class", alf.getAlfClass().toString());
 		//Save second class.
@@ -157,32 +239,81 @@ public class YMLAlfStorage extends AlfStorage {
 		}
 		//
 		playerConfig.set("verbose", alf.isVerbose());
-//		playerConfig.set("suppressed", new ArrayList<String>(alf.getSuppressedSkills()));
+		playerConfig.set("suppressed", new ArrayList<String>(alf.getSuppressedSkills()));
 		playerConfig.set("mana", alf.getMana());
 		playerConfig.set("health", alf.getHealth());
-		
+
 		saveSkillSettings(alf, playerConfig.createSection("skill-settings"));
-//		saveCooldowns(alf, playerConfig.createSection("cooldowns"));
+		saveCooldowns(alf, playerConfig.createSection("cooldowns"));
 		saveExperience(alf, playerConfig.createSection("experience"));
 		saveBinds(alf, playerConfig.createSection("binds"));
-		
+
 		playerConfig.save(playerFile);
-		
+
 		return true;
 	}
-	
+
+	/**
+	 * Save skill settings.
+	 * @param alf
+	 * @param config
+	 */
 	private void saveSkillSettings(Alf alf, ConfigurationSection config) {
-		
+		Map.Entry<String, ConfigurationSection> entry;
+		for (Iterator<Entry<String, ConfigurationSection>> it = alf.getSkillSettings().entrySet().iterator(); it.hasNext(); ) { 
+			entry = (Map.Entry<String,ConfigurationSection>)it.next();
+			for (String key : entry.getValue().getKeys(true))
+				if (!entry.getValue().isConfigurationSection(key))
+					config.set(entry.getKey()+"."+key, entry.getValue().get(key));
+		}
 	}
-	
+
 	private void saveExperience(Alf alf, ConfigurationSection config) {
-		
+
 	}
 	
-	private void saveBinds(Alf alf, ConfigurationSection config) {
-		
+	/**
+	 * Save cooldowns.
+	 * @param alf
+	 * @param section
+	 */
+	private void saveCooldowns(Alf alf, ConfigurationSection section)
+	{
+		if (section == null) {
+			AlfCore.debugLog(Level.SEVERE, new StringBuilder().append("Could not create cooldown section for ").append(alf.getName()).toString());
+			return;
+		}
+
+		long time = System.currentTimeMillis();
+		Map<String, Long> cooldowns = alf.getCooldowns();
+		for (Map.Entry<String, Long> entry : cooldowns.entrySet()) {
+			String skillName = (String)entry.getKey();
+			Long cooldown = (Long)entry.getValue();
+			if (cooldown.longValue() > time) {
+				AlfCore.debugLog(Level.INFO, alf.getName()+": - "+skillName+" @ "+cooldown);
+				section.set(skillName, cooldown.toString());
+			}
+		}
 	}
-	
+
+	/**
+	 * Save binds.
+	 * @param alf
+	 * @param section
+	 */
+	private void saveBinds(Alf alf, ConfigurationSection section) {
+		if (section == null)
+			return;
+		Map<Material, String[]> binds = alf.getBinds();
+		for (Material material : binds.keySet()) {
+			String[] bindArgs = (String[]) binds.get(material);
+			String bind = "";
+			for (String arg : bindArgs)
+				bind += arg + " ";
+			section.set(material.toString(), bind.substring(0, bind.length() - 1));
+		}
+	}
+
 
 	/**
 	 * Shut down 

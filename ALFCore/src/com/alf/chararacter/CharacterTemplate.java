@@ -9,6 +9,8 @@ import com.alf.AlfCore;
 import com.alf.chararacter.effect.CombatEffect;
 import com.alf.chararacter.effect.Effect;
 import com.alf.chararacter.effect.EffectType;
+import com.alf.chararacter.effect.Expirable;
+import com.alf.chararacter.effect.Periodic;
 
 /**
  * Encapsulates a living entity and appends additional characteristics.
@@ -64,7 +66,16 @@ public abstract class CharacterTemplate {
 	 * @param effect
 	 */
 	public void addEffect(Effect effect) {
-		throw new Error("Implement me!");
+		//Remove the effect if it already exists.
+		if (hasEffect(effect.getName()))
+			removeEffect(getEffect(effect.getName()));
+		
+		//Manage the effect if it is periodic/expirable.
+		if (effect instanceof Periodic || effect instanceof Expirable)
+			this.plugin.getEffectManager().manageEffect(this, effect);
+		
+		//Store the effect.
+		this.effects.put(effect.getName().toLowerCase(), effect);
 	}
 	
 	/**
@@ -82,7 +93,10 @@ public abstract class CharacterTemplate {
 	 * @return
 	 */
 	public boolean hasEffectType(EffectType type)  {
-		throw new Error("Implement me!");
+		for (Effect e : this.effects.values())
+			if (e.isType(type))
+				return true;
+		return false;
 	}
 	
 	/**
@@ -90,7 +104,12 @@ public abstract class CharacterTemplate {
 	 * @param effect
 	 */
 	public void removeEffect(Effect effect) {
-		throw new Error("Implement me!");
+		if (effect != null) {
+			if (effect instanceof Expirable || effect instanceof Periodic)
+				this.plugin.getEffectManager().queueForRemoval(this, effect);
+			effect.remove(this);
+			this.effects.remove(effect.getName().toLowerCase());
+		}
 	}
 	
 	/**
@@ -98,7 +117,11 @@ public abstract class CharacterTemplate {
 	 * @param effect
 	 */
 	public void manualRemoveEffect(Effect effect) {
-		throw new Error("Implement me!");
+		if (effect != null) {
+			if (effect instanceof Expirable || effect instanceof Periodic)
+				this.plugin.getEffectManager().queueForRemoval(this, effect);
+			this.effects.remove(effect.getName().toLowerCase());
+		}
 	}
 	
 	/**

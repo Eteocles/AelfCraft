@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import net.minecraft.server.v1_4_5.EntityPlayer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -25,6 +26,7 @@ import com.alf.chararacter.CharacterManager;
 import com.alf.chararacter.effect.CombatEffect;
 import com.alf.command.Command;
 import com.alf.util.DeathManager;
+import com.alf.util.Messaging;
 import com.alf.util.DeathManager.PlayerInventoryStorage;
 import com.alf.util.DeathManager.StoredItemStack;
 import com.alf.util.Util;
@@ -62,19 +64,23 @@ public class APlayerListener implements Listener {
 			alf.resetCombatEffect();
 		}
 		
-//		cm.checkClass(alf);
-//		alf.syncExperience();
-//		alf.syncHealth();
-//		alf.checkInventory();
+		cm.checkClass(alf);
+		alf.syncExperience();
+		alf.syncHealth();
+		alf.checkInventory();
 		
 		//class prefix name
+		if (AlfCore.properties.prefixClassName)
+			player.setDisplayName("[" + alf.getAlfClass().getName() + "] " + player.getName());
 		
 		//bonus expiration
-		
+		if (System.currentTimeMillis() < AlfCore.properties.expiration)
+			Messaging.send(player, AlfCore.properties.bonusMessage, new Object[0]);
+
 		this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
 			public void run() {
-//				APlayerListener.this.plugin.getCharacterManager().performSkillChecks(alf);
-//				alf.checkInventory();
+				APlayerListener.this.plugin.getCharacterManager().performSkillChecks(alf);
+				alf.checkInventory();
 			}
 		}, 5L);
 		player.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Welcome to AelfCraft!");
@@ -110,7 +116,7 @@ public class APlayerListener implements Listener {
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		Player player = event.getPlayer();
 		final Alf alf = this.plugin.getCharacterManager().getAlf(player);
-//		alf.setHealth(alf.getMaxHealth());
+		alf.setHealth(alf.getMaxHealth());
 		alf.setMana(0);
 		
 		//If the DeathManager contains the stored player...
@@ -139,13 +145,13 @@ public class APlayerListener implements Listener {
 		entityPlayer.exp = 0.0F;
 		entityPlayer.expTotal = 0;
 		entityPlayer.expLevel = 0;
-//		Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
-//			public void run() {
-//				APlayerListener.this.plugin.getCharacterManager().performSkillChecks(alf);
-//				alf.checkInventory();
-//				alf.syncExperience();
-//			}
-//		}, 20L);
+		Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
+			public void run() {
+				APlayerListener.this.plugin.getCharacterManager().performSkillChecks(alf);
+				alf.checkInventory();
+				alf.syncExperience();
+			}
+		}, 20L);
 	}
 	
 }

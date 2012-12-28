@@ -5,10 +5,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.potion.PotionType;
 
 import com.alf.AlfCore;
 
@@ -126,9 +132,34 @@ public class Properties {
 	public long expiration;
 	/** Bonus message. */
 	public String bonusMessage;
-	
+	/** Maps a name to its corresponding recipe group. */
+	public Map<String, RecipeGroup> recipes = new HashMap<String, RecipeGroup>();
+	/** Loads in the CharacterDamageManager. Hands amount of potion health per tier. */
 	public double potHealthPerTier;
-
+	//Experience
+	/** Experience gained from killing entity types. */
+	public Map<EntityType, Double> creatureKillingExp = new EnumMap<EntityType, Double>(EntityType.class);
+	/** Experience gained from farming certain blocks. */
+	public Map<Material, Double> farmingExp = new EnumMap<Material, Double>(Material.class);
+	/** Experience gained from breeding animals. */
+	public Map<EntityType, Double> breedingExp = new EnumMap<EntityType, Double>(EntityType.class);
+	/** Experience gained from expending 1 metal. */
+	public double metalExpMultiplier = 0.0D;
+	/** Experience gained from smelting 1 item. */
+	public double smeltExpMultiplier = 0.0D;
+	/** Experience gained from fishing. */
+	public double fishingExp = 0.0D;
+	/** Experience gained from mining ores. */
+	public Map<Material, Double> miningExp = new EnumMap<Material, Double>(Material.class);
+	/** Experience gained from brewing. */
+	public Map<PotionType, Double> potionExp = new EnumMap<PotionType, Double>(PotionType.class);
+	/** Experience gained for enchanting. TODO PLEASE FIX */
+	public double enchantingExp = 0.0D;
+	/** Experience gained for logging. */
+	public Map<Material, Double> loggingExp = new EnumMap<Material, Double>(Material.class);
+	/** TODO PLEASE FIX */
+	public double tradingExp = 0.0D;
+	
 	//Plugin reference.
 	private AlfCore plugin;
 	
@@ -144,6 +175,12 @@ public class Properties {
 		
 		//Load all config sections.
 		loadLevelConfig(config.getConfigurationSection("leveling"));
+		loadClassConfig(config.getConfigurationSection("classes"));
+		loadProperties(config.getConfigurationSection("properties"));
+		loadManaConfig(config.getConfigurationSection("mana"));
+		loadBedConfig(config.getConfigurationSection("bed"));
+		loadHatsConfig(config.getConfigurationSection("hats"));
+		loadBonusConfig(config.getConfigurationSection("bonus"));
 	}
 	
 	/**
@@ -236,6 +273,87 @@ public class Properties {
 				return i+1;
 		}
 		return -1;
+	}
+	
+	/**
+	 * Load bonus config.
+	 * @param section
+	 */
+	private void loadBonusConfig(ConfigurationSection section) {
+		if (section != null) {
+			this.expBonus = section.getDouble("exp", 1.0D);
+			this.expiration = section.getLong("expiration", 0L);
+			this.bonusMessage = section.getString("message");
+		}
+	}
+	
+	/**
+	 * Load hats config.
+	 * @param section
+	 */
+	private void loadHatsConfig(ConfigurationSection section) {
+		if (section != null) {
+			this.hatsLevel = Util.toIntNonNull(section.get("level", 1), "level");
+			this.allowHats = section.getBoolean("enabled", false);
+		}
+	}
+	
+	/**
+	 * Load bed config.
+	 * @param section
+	 */
+	private void loadBedConfig(ConfigurationSection section) {
+		if (section != null) {
+			this.bedHeal = section.getBoolean("enabled", true);
+			this.healInterval = Util.toIntNonNull(section.get("interval", 30), "interval");
+			this.healPercent = Util.toIntNonNull(section.get("percent", 5), "percent");
+		}
+	}
+	
+	/** Load Mana Config. */
+	private void loadManaConfig(ConfigurationSection section) {
+		if (section != null) {
+			this.manaRegenInterval = Util.toIntNonNull(section.get("interval",5), "interval");
+			this.manaRegenPercent = Util.toIntNonNull(section.get("percent", 5), "percent");
+
+			if ((this.manaRegenPercent > 100) || (this.manaRegenPercent < 0))
+				this.manaRegenPercent = 5; //This is seemingly arbitrary.
+		}
+	}
+	
+	/** Load Properties. */
+	private void loadProperties(ConfigurationSection section) {
+		if (section != null) {
+			this.storageType = section.getString("storage-type");
+			this.economy = section.getBoolean("economy", false);
+			this.debug = section.getBoolean("debug", false);
+			this.foodHealPercent = Util.toDoubleNonNull(section.get("food-heal-percent", 0.05D), "food-heal-percent");
+			this.globalCooldown = Util.toIntNonNull(section.get("global-cooldown", 1), "global-cooldown");
+			this.blockTrackingDuration = Util.toIntNonNull(section.get("block-tracking-duration", 600000), "block-tracking-duration");
+			this.maxTrackedBlocks = Util.toIntNonNull(section.get("max-tracked-blocks", 1000), "max-tracked-blocks");
+			this.enchantXPMultiplier = Util.toDoubleNonNull(section.get("enchant-exp-mult", 1), "enchant-exp-mult");
+			this.slowCasting = section.getBoolean("slow-while-casting", true);
+			combatTime = Util.toIntNonNull(section.get("combat-time", 10000), "combat-time");
+		}
+	}
+
+	/** Load Class Config. */
+	private void loadClassConfig(ConfigurationSection section) {
+		if (section != null) {
+			this.prefixClassName = section.getBoolean("use-prefix", false);
+			this.resetExpOnClassChange = section.getBoolean("reset-exp-on-change", true);
+			this.resetMasteryOnClassChange = section.getBoolean("reset-master-on-change", false);
+			this.resetProfMasteryOnClassChange = section.getBoolean("reset-prof-master-on-change", false);
+			this.resetProfOnPrimaryChange = section.getBoolean("reset-prof-on-pri-change", false);
+			this.lockPathTillMaster = section.getBoolean("lock-till-master", false);
+			this.lockAtHighestTier = section.getBoolean("lock-at-max-level", false);
+			this.swapMasterFree = section.getBoolean("master-swap-free", true);
+			this.firstSwitchFree = section.getBoolean("first-swap-free", true);
+			this.swapCost = Util.toDoubleNonNull(section.get("swap-cost", 0), "swap-cost");
+			this.oldClassSwapCost = Util.toDoubleNonNull(section.get("old-swap-cost", 0), "old-swap-cost");
+			this.profSwapCost = Util.toDoubleNonNull(section.get("prof-swap-cost", 0.0D), "prof-swap-cost");
+			this.profSwapPower = Util.toDoubleNonNull(section.get("prof-swap-pow", 3.0D), "prof-swap-pow");
+		}
 	}
 	
 	/** Save config. */

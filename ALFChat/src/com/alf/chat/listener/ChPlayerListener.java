@@ -39,10 +39,23 @@ public class ChPlayerListener implements Listener {
 		//Get the channels the sender is in, if any.
 		ChPlayer player = this.plugin.getChatManager().getChPlayer(event.getPlayer());
 		ChatManager cm = this.plugin.getChatManager();
+		
+		if (player.isSlow()) {
+			if (player.getLastChatTime() + ChatManager.SLOW_INTERVAL > System.currentTimeMillis()) {
+				//If not enough time has elapsed between slow chats, cancel.
+				Messaging.send(player.getPlayer(), "Not enough time has elapsed since your last message. Please wait $1 seconds.", 
+						new Object[] { (int)((player.getLastChatTime() + ChatManager.SLOW_INTERVAL - System.currentTimeMillis()) / 1000L) },
+						ChatColor.RED);
+				event.setCancelled(true);
+				return;
+			}
+		}
+		
 		String mainChannel = player.getMainChannel();
 		if (mainChannel != null) {
 			//Check message for filters and profanity.
-			cm.getChannel(player.getMainChannel()).sendMessage(player, event.getMessage(), new Object[0]);
+			cm.getChannel(player.getMainChannel()).sendMessage(player, cm.filter(event.getMessage(), player), new Object[0]);
+			player.updateChatTime();
 		} else {
 			Messaging.send(player.getPlayer(), "You are not in any channels!", new Object[0], ChatColor.GRAY);
 		}
