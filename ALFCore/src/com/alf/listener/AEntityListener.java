@@ -1,7 +1,5 @@
 package com.alf.listener;
 
-//import org.bukkit.Bukkit;
-//import org.bukkit.entity.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -9,33 +7,30 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Tameable;
-//import org.bukkit.entity.Projectile;
-//import org.bukkit.entity.Skeleton;
-//import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-//import org.bukkit.event.entity.EntityDamageByEntityEvent;
-//import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 
 import com.alf.AlfCore;
+import com.alf.api.event.AlfEnterCombatEvent;
 import com.alf.api.event.AlfKillCharacterEvent;
-import com.alf.chararacter.Alf;
-//import com.alf.api.event.AlfKillCharacterEvent;
-//import com.alf.chararacter.CharacterManager;
-//import com.alf.chararacter.CharacterTemplate;
-import com.alf.chararacter.CharacterManager;
-import com.alf.chararacter.CharacterTemplate;
-import com.alf.chararacter.Monster;
-import com.alf.chararacter.classes.AlfClass;
-import com.alf.chararacter.effect.CombatEffect;
-import com.alf.chararacter.effect.Effect;
-import com.alf.chararacter.effect.common.CombustEffect;
-import com.alf.chararacter.effect.common.SummonEffect;
+import com.alf.character.Alf;
+import com.alf.character.CharacterManager;
+import com.alf.character.CharacterTemplate;
+import com.alf.character.Monster;
+import com.alf.character.classes.AlfClass;
+import com.alf.character.effect.CombatEffect;
+import com.alf.character.effect.Effect;
+import com.alf.character.effect.common.CombustEffect;
+import com.alf.character.effect.common.QuickenEffect;
+import com.alf.character.effect.common.SummonEffect;
+import com.alf.character.party.AlfParty;
 import com.alf.util.Properties;
 import com.alf.util.Util;
 
@@ -211,9 +206,90 @@ public class AEntityListener implements Listener {
 
 		if (experienceType != null && addedExp > 0.0D)
 			if (attacker.hasParty()) {
-				throw new Error("Implement me!");
+				attacker.getParty().gainExp(addedExp, experienceType, defender.getLocation());
 			} else if (attacker.canGain(experienceType))
 				attacker.gainExp(addedExp, experienceType, defender.getLocation());
+	}
+	
+	/**
+	 * Handle entity target.
+	 * @param event
+	 */
+	@EventHandler(ignoreCancelled=true)
+	public void onEntityTarget(EntityTargetEvent event) {
+		if (!(event.getTarget() instanceof Player)) {
+			return;
+		}
+
+		Alf alf = this.plugin.getCharacterManager().getAlf((Player)event.getTarget());
+		if ((alf.hasEffect("Invisible")) || (alf.hasEffect("Invuln")))
+			event.setCancelled(true);
+	}
+	
+	/**
+	 * Handle entity regaining health.
+	 * @param event
+	 */
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onEntityRegainHealth(EntityRegainHealthEvent event) {
+		if (! (event.getEntity() instanceof Player))
+			return;
+		
+		Player player = (Player) event.getEntity();
+		Alf alf = this.plugin.getCharacterManager().getAlf(player);
+		
+		if (alf.hasParty()) {
+			AlfParty party = alf.getParty();
+			if (event.getAmount() > 0)
+				party.update();
+		}
+	}
+	
+	/**
+	 * Handle entity damaging.
+	 * @param event
+	 */
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onEntityDamage(EntityDamageEvent event) {
+		if (event.getDamage() == 0 || event.getEntity().isDead() || 
+				! (event.getEntity() instanceof LivingEntity)) 
+			return;
+		
+		LivingEntity defender = (LivingEntity) event.getEntity();
+		LivingEntity attacker = getAttacker(event);
+		
+		if (attacker == null)
+			return;
+		
+		//Enter combat.
+		if (attacker instanceof Player) {
+			Alf alf = this.plugin.getCharacterManager().getAlf((Player) attacker);
+			if (alf.isInCombatWith(defender))
+				alf.refreshCombat();
+			else {
+				CombatEffect.CombatReason reason = (defender instanceof Player) ?
+						CombatEffect.CombatReason.ATTACKED_PLAYER : CombatEffect.CombatReason.ATTACKED_MOB;
+				this.plugin.getServer().getPluginManager().callEvent(
+						new AlfEnterCombatEvent(alf, defender, reason));
+				alf.enterCombatWith(defender, reason);
+			}
+		}
+		
+		if (defender instanceof Player) {
+			Alf alf = this.plugin.getCharacterManager().getAlf((Player) defender);
+			if (alf.isInCombatWith(attacker))
+				alf.refreshCombat();
+			else {
+				CombatEffect.CombatReason reason = (defender instanceof Player) ?
+						CombatEffect.CombatReason.DAMAGED_BY_PLAYER : CombatEffect.CombatReason.DAMAGED_BY_MOB;
+				this.plugin.getServer().getPluginManager().callEvent(
+						new AlfEnterCombatEvent(alf, attacker, reason));
+				alf.enterCombatWith(attacker, reason);
+			}
+			for (Effect e : alf.getEffects())
+				if (e instanceof QuickenEffect)
+					e.reapplyToAlf(alf);
+		}
 	}
 
 	/**

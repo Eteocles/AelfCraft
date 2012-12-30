@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 
-import com.alf.AlfCore;
 import com.alf.chat.channel.AnnouncementChannel;
 import com.alf.chat.channel.ChatChannel;
 import com.alf.chat.channel.NormalChannel;
@@ -33,7 +32,7 @@ public class ChatManager {
 	//
 	private List<String> censors;
 	//Threshold for caps limit.
-	private static double CAPS_THRESHOLD = 100;
+	private static double CAPS_THRESHOLD = 75;
 	//Number of milliseconds between slow-chat messages.
 	public static long SLOW_INTERVAL = 15000L;
 	public static long SLOW_LENGTH = 300000L;
@@ -68,14 +67,19 @@ public class ChatManager {
 		
 		//Allow the player to see default-channel talk.
 		addPlayerToChannelAudience(cplayer, DEFAULT_CHANNEL);
-		//If the user is in group 'default,' add to guest channel.
-		if (AlfCore.perms.getPrimaryGroup(player).equals(GUEST_CHANNEL)) {
-			cplayer.setMainChannel(GUEST_CHANNEL);
-			Messaging.send(player, "You have joined the Guest Channel!", new Object[0]);
-		}
-		if (cplayer.getMainChannel() == null) {
+		addPlayerToChannelAudience(cplayer, GUEST_CHANNEL);
+		
+		if (cplayer.getMainChannel() == null && player.hasPermission("alfchat.channel.default")) {
 			cplayer.setMainChannel(DEFAULT_CHANNEL);
 			Messaging.send(player, "You have joined the Default Channel!", new Object[0]);
+		} else if (cplayer.getMainChannel() == null){
+			cplayer.setMainChannel(GUEST_CHANNEL);
+			Messaging.send(player, "You have joined the Guest Channel!", new Object[0]);
+			//Add the guest to broadcasting channels.
+			for (String s : chatChannels.keySet()) {
+				if (chatChannels.get(s).getType() == ChatChannel.ChannelType.ANNOUNCE)
+					addPlayerToChannelAudience(cplayer, s);
+			}
 		}
 		
 		//Loaded player has set of channels. Sync.
@@ -378,15 +382,22 @@ public class ChatManager {
 		} else AlfChat.log(Level.WARNING, "No channels section defined!");
 		
 		DEFAULT_CHANNEL = config.getString("default");
-		GUEST_CHANNEL = config.getString("guests");
+		GUEST_CHANNEL = config.getString("guest");
 		
 		if (DEFAULT_CHANNEL == null) {
 			AlfChat.log(Level.WARNING, "No default channel defined!");
 			DEFAULT_CHANNEL = this.chatChannels.values().iterator().next().getName();
 		}
+		else {
+			AlfChat.log(Level.INFO, "Loaded the default channel: " + DEFAULT_CHANNEL);
+		}
+		
 		if (GUEST_CHANNEL == null) {
 			AlfChat.log(Level.WARNING, "No guest channel defined!");
 			GUEST_CHANNEL = DEFAULT_CHANNEL;
+		}
+		else {
+			AlfChat.log(Level.INFO, "Loaded the guest channel: " + GUEST_CHANNEL);
 		}
 	}
 	
@@ -424,8 +435,6 @@ public class ChatManager {
 			if (player.getPlayer().hasPermission("alfchat.filter.bypass") || player.getPlayer().isOp())
 				return message;
 			player.setSlow(true);
-			Messaging.send(player.getPlayer(), "Watch your tongue! Slow chat mode enabled for " + SLOW_LENGTH/1000L + " seconds!", new Object[0],
-					ChatColor.RED);
 			//TODO Get the Alf representation from AlfCore and lower karma.
 		}
 		

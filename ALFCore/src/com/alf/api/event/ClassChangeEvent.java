@@ -4,8 +4,8 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.classes.AlfClass;
+import com.alf.character.Alf;
+import com.alf.character.classes.AlfClass;
 
 /**
  * Describes an event in which an Alf changes classes.

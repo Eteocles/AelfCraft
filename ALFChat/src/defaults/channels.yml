@@ -39,7 +39,7 @@ announcer:
   announcements:
     - This is a test broadcast!
     - I love strawberry shortcake!
-    - What is love?
+    - Medic!
   frequency: 1000
 default: general
 guest: guests

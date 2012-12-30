@@ -27,6 +27,7 @@ public enum SkillType {
 	PHYSICAL,
 	SILENCABLE,
 	STEALTHY,
+	TEXT,
 	SUMMON,
 	TELEPORT,
 	UNBINDABLE;

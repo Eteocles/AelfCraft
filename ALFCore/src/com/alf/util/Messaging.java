@@ -6,7 +6,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfPlugin;
-import com.alf.chararacter.CharacterTemplate;
+import com.alf.character.CharacterTemplate;
 
 /**
  * Messaging Utility for AelfCraft.

@@ -6,7 +6,6 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,7 +14,7 @@ import org.bukkit.permissions.Permission;
 import com.alf.AlfCore;
 import com.alf.api.event.AlfChangeLevelEvent;
 import com.alf.api.event.ClassChangeEvent;
-import com.alf.chararacter.Alf;
+import com.alf.character.Alf;
 import com.alf.util.Setting;
 
 /**
@@ -58,16 +57,15 @@ public class OutsourcedSkill extends Skill {
 	 * @param alf
 	 */
 	public void tryLearningSkill(Alf alf) {
-		Player p = alf.getPlayer();
 		//If the skill exists for the player...
 		if (alf.getAlfClass().hasSkill(getName()) || (alf.getSecondClass() != null) &&
 				alf.getSecondClass().hasSkill(getName())) {
 			//If the alf has a high enough skill level...
 			if (alf.getSkillLevel(this) >= SkillConfigManager.getUseSetting(alf, this, Setting.LEVEL, 
 					1, true)) {
-				AlfCore.perms.playerAddTransient(p, this.permission.getName());
+				alf.addPermission(this.permission.getName());
 			} else {
-				AlfCore.perms.playerRemoveTransient(p, this.permission.getName());
+				alf.removePermission(this.permission.getName());
 			}
 		} else {
 			if (this.permissions == null) {
@@ -75,7 +73,7 @@ public class OutsourcedSkill extends Skill {
 						"! Fix your config.");
 				return;
 			}
-			AlfCore.perms.playerRemoveTransient(p, this.permission.getName());
+			alf.removePermission(this.permission.getName());
 		}
 	}
 	

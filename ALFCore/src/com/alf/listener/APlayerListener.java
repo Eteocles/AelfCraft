@@ -9,12 +9,17 @@ import net.minecraft.server.v1_4_5.EntityPlayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -22,15 +27,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.CharacterManager;
-import com.alf.chararacter.classes.AlfClass;
-import com.alf.chararacter.effect.CombatEffect;
+import com.alf.character.Alf;
+import com.alf.character.CharacterManager;
+import com.alf.character.classes.AlfClass;
+import com.alf.character.effect.CombatEffect;
+import com.alf.character.effect.PeriodicEffect;
 import com.alf.command.Command;
+import com.alf.skill.Skill;
 import com.alf.util.DeathManager;
 import com.alf.util.Messaging;
 import com.alf.util.DeathManager.PlayerInventoryStorage;
 import com.alf.util.DeathManager.StoredItemStack;
+import com.alf.util.Properties;
 import com.alf.util.Util;
 
 /**
@@ -124,7 +132,6 @@ public class APlayerListener implements Listener {
 		//If the DeathManager contains the stored player...
 		DeathManager dm = this.plugin.getDeathManager();
 		if (dm.containsPlayer(player)) {
-			AlfCore.log(Level.INFO, "Death Manager contains player: " + player.getName());
 			//Remove player from DeathManager.
 			PlayerInventoryStorage invStore = dm.popPlayer(player);
 			PlayerInventory playerInv = player.getInventory();
@@ -140,6 +147,8 @@ public class APlayerListener implements Listener {
 				else 
 	            	playerInv.setItem(is.getSlot(), is.getItem());
 			}
+			AlfCore.log(Level.INFO, "Death Manager restored " + inv.size() + " item stacks to " +
+			" player: " + player.getName());
 		}
 		
 		CraftPlayer craftPlayer = (CraftPlayer) player;
@@ -157,6 +166,47 @@ public class APlayerListener implements Listener {
 	}
 	
 	/**
+	 * Handle player interacting.
+	 * @param event
+	 */
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		Alf alf = this.plugin.getCharacterManager().getAlf(player);
+		
+		//TODO lots of stuff here
+		
+	    if (player.getItemInHand() != null && player.hasPermission("alf.bind")) {
+	        Material material = player.getItemInHand().getType();
+	        if (alf.hasBind(material)) {
+	          if ((!material.isBlock() && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) || (material.isBlock() && (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK))) {
+	            String[] args = alf.getBind(material);
+	            this.plugin.getCommandParser().dispatch(player, "skill", "skill", args);
+	            
+	            try {
+	              String ident = "skill";
+	              for (String arg : args)
+	                ident += " " + arg;
+	              
+	              Skill skill = this.plugin.getSkillManager().getSkillFromIdent(ident, player);
+	              if (skill == null && args.length > 1)
+	                skill = this.plugin.getSkillManager().getSkillFromIdent("skill " + args[0], player);
+	              
+//	              isStealthy = skill.isType(SkillType.STEALTHY);
+	            } catch (Exception e) {
+	              String val = "";
+	              for (String arg : args)
+	                val = val + arg + " ";
+	              AlfCore.log(Level.SEVERE, player.getName() + " attempted to use bind for command: " + val + " but that command was not found!");
+	            }
+	          } else alf.cancelDelayedSkill();
+	        }
+	        else alf.cancelDelayedSkill();
+
+	      }
+	}
+	
+	/**
 	 * Handle Player Exp Change.
 	 * @param event
 	 */
@@ -170,6 +220,70 @@ public class APlayerListener implements Listener {
 		}
 		//Suppress regular exp gain.
 		event.setAmount(0);
+	}
+	
+	/**
+	 * Hand player entering bed shenanigans.
+	 * @param event
+	 */
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerBedEnter(PlayerBedEnterEvent event) {
+		Properties props = AlfCore.properties;
+		if (props.bedHeal) {
+			Alf alf = this.plugin.getCharacterManager().getAlf(event.getPlayer());
+			long period = props.healInterval * 1000;
+			double tickHealPercent = props.healPercent / 100.0D;
+			
+			BedHealEffect bhEffect = new BedHealEffect(period, tickHealPercent);
+			alf.addEffect(bhEffect);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onPlayerBedLeave(PlayerBedLeaveEvent event) {
+		if (AlfCore.properties.bedHeal) {
+			Alf alf = this.plugin.getCharacterManager().getAlf(event.getPlayer());
+			if (alf.hasEffect("BedHeal"))
+				alf.removeEffect(alf.getEffect("BedHeal"));
+		}
+	}
+	
+	/**
+	 * A condition applied to a player in bed which heals him/her.
+	 */
+	public class BedHealEffect extends PeriodicEffect {
+		private final double tickHealPercent;
+		
+		/**
+		 * Construct the Bed Healing Effect.
+		 * @param period
+		 * @param tickHealPercent
+		 */
+		public BedHealEffect(long period, double tickHealPercent) {
+			super(APlayerListener.this.plugin, "BedHeal", period);
+			this.tickHealPercent = tickHealPercent;
+		}
+		
+		/**
+		 * Apply the effect to the given alf.
+		 */
+		public void applyToAlf(Alf alf) {
+			super.applyToAlf(alf);
+			this.lastTickTime = System.currentTimeMillis();
+		}
+		
+		/**
+		 * Tick the effect.
+		 */
+		public void tickAlf(Alf alf) {
+			super.tickAlf(alf);
+			Player player = alf.getPlayer();
+			int healAmount = (int) Math.ceil(alf.getMaxHealth() * this.tickHealPercent);
+			alf.setHealth(alf.getHealth() + healAmount);
+			alf.syncHealth();
+			if (alf.isVerbose())
+				player.sendMessage(Messaging.createFullHealthBar(alf.getHealth(), alf.getMaxHealth()));
+		}
 	}
 	
 }

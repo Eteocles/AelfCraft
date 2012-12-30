@@ -12,11 +12,11 @@ import com.alf.AlfCore;
 import com.alf.api.SkillResult;
 import com.alf.api.event.SkillCompleteEvent;
 import com.alf.api.event.SkillUseEvent;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.CharacterManager;
-import com.alf.chararacter.classes.AlfClass;
-import com.alf.chararacter.effect.EffectType;
-import com.alf.chararacter.effect.common.SlowEffect;
+import com.alf.character.Alf;
+import com.alf.character.CharacterManager;
+import com.alf.character.classes.AlfClass;
+import com.alf.character.effect.EffectType;
+import com.alf.character.effect.common.SlowEffect;
 import com.alf.util.Messaging;
 import com.alf.util.Setting;
 

@@ -7,17 +7,33 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.permission.Permission;
+//import net.milkbowl.vault.permission.Permission;
 
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.CharacterDamageManager;
-import com.alf.chararacter.CharacterManager;
-import com.alf.chararacter.classes.AlfClass;
-import com.alf.chararacter.classes.AlfClassManager;
-import com.alf.chararacter.effect.EffectManager;
-import com.alf.chararacter.party.PartyManager;
+import com.alf.character.Alf;
+import com.alf.character.CharacterDamageManager;
+import com.alf.character.CharacterManager;
+import com.alf.character.classes.AlfClass;
+import com.alf.character.classes.AlfClassManager;
+import com.alf.character.effect.EffectManager;
+import com.alf.character.party.PartyManager;
 import com.alf.command.CommandHandler;
+import com.alf.command.CommandParser;
+import com.alf.command.commands.AdminHealCommand;
+import com.alf.command.commands.AdminHealthCommand;
+import com.alf.command.commands.BindSkillCommand;
+import com.alf.command.commands.ConfigReloadCommand;
 import com.alf.command.commands.HelpCommand;
+import com.alf.command.commands.ManaCommand;
+import com.alf.command.commands.PartyAcceptCommand;
+import com.alf.command.commands.PartyChatCommand;
+import com.alf.command.commands.PartyInviteCommand;
+import com.alf.command.commands.PartyKickCommand;
+import com.alf.command.commands.PartyLeadCommand;
+import com.alf.command.commands.PartyLeaveCommand;
+import com.alf.command.commands.PartyModeCommand;
+import com.alf.command.commands.PartyWhoCommand;
+import com.alf.command.commands.ShushCommand;
+import com.alf.listener.ADamageListener;
 import com.alf.listener.AEntityListener;
 import com.alf.listener.APlayerListener;
 import com.alf.skill.OutsourcedSkill;
@@ -56,8 +72,6 @@ public class AlfCore extends AlfPlugin {
 	public static final Properties properties = new Properties();
 	//Link to external Economy.
 	public static Economy econ;
-	//Link to external Permissions.
-	public static Permission perms;
 
 	/**
 	 * Default constructor.
@@ -173,7 +187,7 @@ public class AlfCore extends AlfPlugin {
 	 * Setup the plugin during enabling.
 	 */
 	public void setup() {
-		if ((getServer().getPluginManager().getPlugin("Vault") == null || (! setupPermissions()))) {
+		if ((getServer().getPluginManager().getPlugin("Vault") == null)) {
 			log(Level.WARNING, "ALFCore requires Vault! Please install it before running again.");
 			getServer().getPluginManager().disablePlugin(this);
 		} else {
@@ -191,7 +205,7 @@ public class AlfCore extends AlfPlugin {
 			}
 
 			this.effectManager = new EffectManager(this);
-			this.partyManager = new PartyManager(this);
+			this.partyManager = new PartyManager();
 			this.characterManager = new CharacterManager(this);
 			this.damageManager = new CharacterDamageManager(this);
 			this.skillManager = new SkillManager(this);
@@ -215,7 +229,7 @@ public class AlfCore extends AlfPlugin {
 			AlfClass alfClass = alf.getAlfClass();
 			
 			//Set to default class if permissions are invalid.
-			if (alfClass != this.classManager.getDefaultClass() && ! perms.has(p,
+			if (alfClass != this.classManager.getDefaultClass() && ! p.hasPermission(
 					"alfcore.classes."+alfClass.getName().toLowerCase())) {
 				alf.setAlfClass(this.classManager.getDefaultClass(), false);
 			}
@@ -240,21 +254,38 @@ public class AlfCore extends AlfPlugin {
 	 * Set up the permission hook.
 	 * @return - whether the hook was successful
 	 */
-	private boolean setupPermissions() {
-		if (getServer().getPluginManager().getPlugin("Vault") == null)
-			return false;
-		RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-		if (rsp != null)
-			perms = (Permission) rsp.getProvider();
-		return perms != null;
-	}
+//	private boolean setupPermissions() {
+//		if (getServer().getPluginManager().getPlugin("Vault") == null)
+//			return false;
+//		RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+//		if (rsp != null)
+//			perms = (Permission) rsp.getProvider();
+//		return perms != null;
+//	}
 
 	protected void registerCommands() {
-		this.getCommandParser().addCommand(new HelpCommand(this));
+		CommandParser cp = this.getCommandParser();
+		cp.addCommand(new HelpCommand(this));
+		cp.addCommand(new ShushCommand(this));
+		cp.addCommand(new AdminHealCommand(this));
+		cp.addCommand(new AdminHealthCommand(this));
+		cp.addCommand(new BindSkillCommand(this));
+		cp.addCommand(new ConfigReloadCommand(this));
+		cp.addCommand(new ManaCommand(this));
+		cp.addCommand(new PartyAcceptCommand(this));
+		cp.addCommand(new PartyChatCommand(this));
+		cp.addCommand(new PartyInviteCommand(this));
+		cp.addCommand(new PartyKickCommand(this));
+		cp.addCommand(new PartyLeadCommand(this));
+		cp.addCommand(new PartyLeaveCommand(this));
+		cp.addCommand(new PartyModeCommand(this));
+		cp.addCommand(new PartyWhoCommand(this));
 	}
 
 	protected void registerEvents() {
+		
 		Bukkit.getPluginManager().registerEvents(new AEntityListener(this), this);
 		Bukkit.getPluginManager().registerEvents(new APlayerListener(this), this);
+		Bukkit.getPluginManager().registerEvents(new ADamageListener(this, this.damageManager), this);
 	}
 }

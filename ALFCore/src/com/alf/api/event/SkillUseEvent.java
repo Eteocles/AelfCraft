@@ -6,7 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
-import com.alf.chararacter.Alf;
+import com.alf.character.Alf;
 import com.alf.skill.Skill;
 
 /**

@@ -1,6 +1,6 @@
 name: AelfChat
 main: com.alf.chat.AlfChat
-version: 0.0
+version: 0.1
 authors: [Eteocles]
 description: Chat customization- Channels, Filtering, etc.
 depend: []
@@ -21,4 +21,8 @@ permissions:
   alfchat.*:
     description: Gives access to administration commands for AlfChat
     children:
-      alfchat.filter.bypass: false
+      alfchat.channel.guest: true
+      alfchat.channel.default: true
+      alfchat.channel.mod: true
+      alfchat.channel.admin: true
+      alfchat.filter.bypass: true

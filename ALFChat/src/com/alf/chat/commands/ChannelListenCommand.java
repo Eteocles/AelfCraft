@@ -34,7 +34,7 @@ public class ChannelListenCommand extends BasicCommand {
 	 */
 	public boolean execute(CommandSender cs, String msg, String[] args) {
 		if (! (cs instanceof Player))
-			return true;
+			return false;
 		if (args.length != 0) {
 			String channel = args[0];
 			if (this.plugin.getChatManager().addPlayerToChannelAudience((Player) cs, channel)) {

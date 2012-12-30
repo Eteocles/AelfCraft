@@ -20,8 +20,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.classes.AlfClass;
+import com.alf.character.Alf;
+import com.alf.character.classes.AlfClass;
 
 /**
  * Stores Alf data in YML.

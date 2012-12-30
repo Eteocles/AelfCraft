@@ -25,6 +25,7 @@ public class ChannelCommand extends BasicCommand {
 		setUsage("/ch §8[channel name]");
 		setArgumentRange(0, Integer.MAX_VALUE);
 		setIdentifiers(new String[] {"ch", "ch talk"});
+		setPermission("alfchat.channel");
 	}
 	
 	/**
@@ -32,7 +33,8 @@ public class ChannelCommand extends BasicCommand {
 	 */
 	public boolean execute(CommandSender cs, String identifier, String[] args) {
 		if (! (cs instanceof Player))
-			return true;
+			return false;
+		
 		Player player = (Player) cs;
 		if (args.length != 0) {
 			ChatManager cm = this.plugin.getChatManager();

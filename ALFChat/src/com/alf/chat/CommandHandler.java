@@ -10,7 +10,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.alf.AlfCore;
 import com.alf.command.Command;
 import com.alf.command.CommandParser;
 import com.alf.util.Messaging;
@@ -112,7 +111,7 @@ public class CommandHandler implements CommandParser {
 		if (! (sender instanceof Player) || permission == null || permission.isEmpty())
 			return true;
 		Player player = (Player) sender;
-		return (player.isOp() || AlfCore.perms.has(player, permission));
+		return (player.isOp() || player.hasPermission(permission));
 	}
 	
 	/**

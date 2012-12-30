@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.alf.chararacter.classes.AlfClass;
+import com.alf.character.classes.AlfClass;
 
 /**
  * Encapsulates an AlfClass and a Skill.

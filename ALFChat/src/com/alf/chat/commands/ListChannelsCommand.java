@@ -35,7 +35,7 @@ public class ListChannelsCommand extends BasicCommand {
 	 */
 	public boolean execute(CommandSender cs, String msg, String[] args) {
 		if (! (cs instanceof Player))
-			return true;
+			return false;
 		ChPlayer player = plugin.getChatManager().getChPlayer((Player) cs);
 		String channelList = "Your chat channels: ";
 		if (player.hasChannels()) {

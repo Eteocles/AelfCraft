@@ -115,7 +115,7 @@ public class CommandHandler implements CommandParser {
 		if (! (sender instanceof Player) || permission == null || permission.isEmpty())
 			return true;
 		Player player = (Player) sender;
-		return (player.isOp() || AlfCore.perms.has(player, permission));
+		return (player.isOp() || player.hasPermission(permission));
 	}
 	
 	/**

@@ -3,7 +3,7 @@ package com.alf.persistence;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.Alf;
+import com.alf.character.Alf;
 
 /**
  * Handles storage of Alf player information.

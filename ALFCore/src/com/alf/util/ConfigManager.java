@@ -18,8 +18,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.classes.AlfClassManager;
+import com.alf.character.Alf;
+import com.alf.character.classes.AlfClassManager;
 import com.alf.skill.SkillConfigManager;
 
 /**

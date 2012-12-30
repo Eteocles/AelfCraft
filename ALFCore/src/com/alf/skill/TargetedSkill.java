@@ -19,8 +19,8 @@ import org.bukkit.util.Vector;
 
 import com.alf.AlfCore;
 import com.alf.api.SkillResult;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.effect.EffectType;
+import com.alf.character.Alf;
+import com.alf.character.effect.EffectType;
 import com.alf.util.Messaging;
 import com.alf.util.Setting;
 import com.alf.util.Util;

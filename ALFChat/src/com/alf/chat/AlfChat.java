@@ -10,8 +10,10 @@ import com.alf.AlfPlugin;
 import com.alf.chat.commands.ChannelCommand;
 import com.alf.chat.commands.ChannelListenCommand;
 import com.alf.chat.commands.ChannelWhoCommand;
+import com.alf.chat.commands.LeaveAllChannelCommand;
 import com.alf.chat.commands.LeaveChannelCommand;
 import com.alf.chat.commands.ListChannelsCommand;
+import com.alf.chat.commands.ToggleSlowCommand;
 import com.alf.chat.listener.ChPlayerListener;
 
 /**
@@ -90,6 +92,8 @@ public class AlfChat extends AlfPlugin {
 		commandParser.addCommand(new ListChannelsCommand(this));
 		commandParser.addCommand(new ChannelWhoCommand(this));
 		commandParser.addCommand(new ChannelListenCommand(this));
+		commandParser.addCommand(new LeaveAllChannelCommand(this));
+		commandParser.addCommand(new ToggleSlowCommand(this));
 	}
 
 	protected void registerEvents() {

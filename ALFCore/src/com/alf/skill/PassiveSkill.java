@@ -11,9 +11,9 @@ import org.bukkit.event.Listener;
 import com.alf.AlfCore;
 import com.alf.api.event.AlfChangeLevelEvent;
 import com.alf.api.event.ClassChangeEvent;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.effect.Effect;
-import com.alf.chararacter.effect.EffectType;
+import com.alf.character.Alf;
+import com.alf.character.effect.Effect;
+import com.alf.character.effect.EffectType;
 import com.alf.util.Messaging;
 import com.alf.util.Setting;
 

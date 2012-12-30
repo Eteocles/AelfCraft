@@ -32,7 +32,7 @@ public class LeaveChannelCommand extends BasicCommand {
 	 */
 	public boolean execute(CommandSender cs, String msg, String[] args) {
 		if (! (cs instanceof Player))
-			return true;
+			return false;
 		if (args.length != 0) {
 			Player p = (Player) cs;
 			ChatManager cm = plugin.getChatManager();

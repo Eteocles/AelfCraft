@@ -3,6 +3,7 @@ package com.alf.chat;
 import java.util.*;
 import java.util.logging.Level;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.alf.chat.channel.ChatChannel;
@@ -121,7 +122,12 @@ public class ChPlayer {
 	public void setSlow(boolean slowMode) {
 		if (slowMode) {
 			this.slowChatStart = System.currentTimeMillis();
+			Messaging.send(player.getPlayer(), "Watch your tongue! Slow chat mode enabled for " + 
+					ChatManager.SLOW_LENGTH / 1000L + " seconds!", new Object[0], ChatColor.RED);
 			AlfChat.log(Level.INFO, "Slow Chat Started for Player " + player.getName() + " at time " + this.slowChatStart);
+		} else {
+			this.slowChatStart = -1;
+			Messaging.send(this.player, "Slow chat mode disabled.", new Object[0]);
 		}
 		this.slowChat = slowMode;
 	}

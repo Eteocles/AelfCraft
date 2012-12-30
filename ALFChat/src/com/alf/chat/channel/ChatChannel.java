@@ -7,7 +7,6 @@ import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.alf.AlfCore;
 import com.alf.chat.ChPlayer;
 
 public abstract class ChatChannel {
@@ -106,9 +105,7 @@ public abstract class ChatChannel {
 	public boolean playerHasPermission(Player player) {
 		if (permission.equals("*"))
 			return true;
-		if (AlfCore.perms == null)
-			return player.isOp();
-		return player.hasPermission(permission);
+		return player.isOp() || player.hasPermission(permission);
 	}
 	
 	/**

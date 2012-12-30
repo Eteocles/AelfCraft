@@ -5,12 +5,16 @@ primary: true
 secondary: false
 description: All legends must begin sommewhere...
 permitted-armor:
+- LEATHER
+- GOLD
 permitted-weapon:
 - FISHING_ROD
 - SHEARS
 - STONE
 permitted-skills:
-    ALL: true
+  Shout:
+        level: 1
+        cooldown: 3000
 experience-sources:
 - KILLING
 - CRAFTING

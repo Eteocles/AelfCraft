@@ -12,12 +12,13 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.Alf;
+import com.alf.character.Alf;
 
 /**
  * Handles utility methods.
@@ -120,6 +121,21 @@ public class Util {
 	public static int getMCExperience(int level) {
 		//TODO Fix
 		return level*7;
+	}
+	
+	/**
+	 * Get the feather fall level of an inventory.
+	 * @param inv
+	 * @return
+	 */
+	public static int getFeatherFallLevel(PlayerInventory inv) {
+		int level = 0;
+		
+		for (ItemStack armor : inv.getArmorContents())
+			if (armor != null && armor.containsEnchantment(Enchantment.PROTECTION_FALL))
+				level += armor.getEnchantmentLevel(Enchantment.PROTECTION_FALL);
+		
+		return level;
 	}
 
 	/**
@@ -260,15 +276,15 @@ public class Util {
 		if (!(val instanceof Number))
 			return null;
 		if (val instanceof Integer)
-			return (Integer)val;
+			return (Integer) val;
 		if (val instanceof Double)
-			return Integer.valueOf(((Double)val).intValue());
+			return ((Double) val).intValue();
 		if (val instanceof Float)
-			return Integer.valueOf(((Float)val).intValue());
+			return ((Float) val).intValue();
 		if (val instanceof Long)
-			return Integer.valueOf(((Long)val).intValue());
+			return ((Long) val).intValue();
 		if (val instanceof BigDecimal)
-			return Integer.valueOf(((BigDecimal)val).intValue());
+			return (((BigDecimal)val).intValue());
 		return null;
 	}
 
@@ -287,15 +303,15 @@ public class Util {
 		if (!(val instanceof Number))
 			return null;
 		if (val instanceof Integer)
-			return Double.valueOf(((Integer)val).doubleValue());
+			return Double.valueOf((Integer)val);
 		if (val instanceof Double)
 			return (Double)val;
 		if (val instanceof Float)
-			return Double.valueOf(((Float)val).doubleValue());
+			return Double.valueOf(((Float)val));
 		if (val instanceof Long)
-			return Double.valueOf(((Long)val).doubleValue());
+			return Double.valueOf(((Long)val));
 		if (val instanceof BigDecimal)
-			return Double.valueOf(((BigDecimal)val).doubleValue());
+			return (((BigDecimal)val).doubleValue());
 		return null;
 	}
 
@@ -314,6 +330,16 @@ public class Util {
 		if (newVal == null)
 			throw new IllegalArgumentException(name + " must be a numeral!");
 		return newVal;
+	}
+	
+	/**
+	 * Format the double by fixing its precision.
+	 * @param d
+	 * @return
+	 */
+	public static double formatDouble(double d) {
+		int val = (int) (d * 1000.0D);
+		return val / 1000.0D;
 	}
 
 	static {

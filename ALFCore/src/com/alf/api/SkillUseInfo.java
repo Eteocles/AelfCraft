@@ -1,6 +1,6 @@
 package com.alf.api;
 
-import com.alf.chararacter.CharacterTemplate;
+import com.alf.character.CharacterTemplate;
 import com.alf.skill.Skill;
 
 /**

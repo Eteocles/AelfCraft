@@ -56,7 +56,7 @@ public class SkillManager {
 				File file = new File(this.dir, skillFile);
 				String name = skillFile.toLowerCase().replace(".jar", "").replace("skill", "");
 				if (this.skillFiles.containsKey(name))
-					AlfCore.log(Level.SEVERE, "Duplicate skil jar found! Please remove " + 
+					AlfCore.log(Level.SEVERE, "Duplicate skill jar found! Please remove " + 
 							skillFile + " or " + ((File) this.skillFiles.get(name)).getName());
 				else {
 					this.skillFiles.put(name, file);
@@ -228,6 +228,7 @@ public class SkillManager {
 			return null;
 		} catch (Exception e) {
 			AlfCore.log(Level.INFO, "The skill " + file.getName() + " failed to load for an unknown reason.");
+			e.printStackTrace();
 			return null;
 		}
 

@@ -34,8 +34,8 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.alf.AlfCore;
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.CharacterTemplate;
+import com.alf.character.Alf;
+import com.alf.character.CharacterTemplate;
 import com.alf.command.BasicCommand;
 import com.alf.util.Messaging;
 import com.alf.util.Setting;

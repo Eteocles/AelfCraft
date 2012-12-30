@@ -54,7 +54,7 @@ public class ChPlayerListener implements Listener {
 		String mainChannel = player.getMainChannel();
 		if (mainChannel != null) {
 			//Check message for filters and profanity.
-			cm.getChannel(player.getMainChannel()).sendMessage(player, cm.filter(event.getMessage(), player), new Object[0]);
+			cm.getChannel(mainChannel).sendMessage(player, cm.filter(event.getMessage(), player), new Object[0]);
 			player.updateChatTime();
 		} else {
 			Messaging.send(player.getPlayer(), "You are not in any channels!", new Object[0], ChatColor.GRAY);

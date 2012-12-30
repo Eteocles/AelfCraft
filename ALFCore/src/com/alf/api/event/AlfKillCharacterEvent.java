@@ -3,9 +3,9 @@ package com.alf.api.event;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import com.alf.chararacter.Alf;
-import com.alf.chararacter.CharacterTemplate;
-import com.alf.chararacter.effect.CombatEffect;
+import com.alf.character.Alf;
+import com.alf.character.CharacterTemplate;
+import com.alf.character.effect.CombatEffect;
 
 /**
  * Describes an event in which an Alf kills a character.

@@ -8,6 +8,24 @@ commands:
     aliases: ['aelf']
     description: AelfCore commands
     usage: /<command>
+  skill:
+    aliases: ['hskill']
+    description: AelfCore command
+    usage: /<command> <skill>
+  bind:
+    description: Bind skill command
+    usage: /<command> <skill>
+  party:
+    aliases: ['pc', 'p']
+    description: Party command
+    usage: /<command> <args>
+  mana:
+    description: Mana command
+    usage: /<mana> 
+  shush:
+    aliases: ['stfu', 'quiet']
+    description: Toggle Aelf output
+    usage: /<command>
 permissions:
   alfcore.admin.*:
     description: Gives access to administration commands for AlfCore
