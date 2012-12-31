@@ -61,7 +61,7 @@ public class PartyKickCommand extends BasicCommand {
 
 		Player tPlayer = Bukkit.getPlayer(args[0]);
 		if (tPlayer == null) {
-			Messaging.send(sender, "That player is not in your party.", new Object[0], ChatColor.RED);
+			Messaging.send(sender, "That player is not online.", new Object[0], ChatColor.RED);
 			return true;
 		}
 		

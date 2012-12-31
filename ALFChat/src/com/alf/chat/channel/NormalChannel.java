@@ -1,6 +1,7 @@
 package com.alf.chat.channel;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.alf.chat.ChPlayer;
@@ -47,6 +48,15 @@ public class NormalChannel extends ChatChannel {
 		for (ChPlayer player : getPlayers()) {
 			Player p = player.getPlayer();
 			Messaging.send(p, "[$1] Broadcast: "+ message, new Object[] {getIden()}, ChatColor.GREEN);
+		}
+	}
+
+	@Override
+	public void sendMessage(CommandSender sender, String message, Object[] args) {
+		for (ChPlayer player : getPlayers()) {
+			Player p = player.getPlayer();
+			Messaging.send(p, "[$1]$2 $3: " + message, 
+					new Object[] {getIden(), ChatColor.WHITE, sender.getName()}, getColorPrefix());
 		}
 	}
 	

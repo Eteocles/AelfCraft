@@ -3,6 +3,7 @@ package com.alf.chat.channel;
 import java.util.*;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfPlugin;
@@ -90,6 +91,12 @@ public class AnnouncementChannel extends ChatChannel {
 		Messaging.send(sender.getPlayer(), "[$1]$2 This channel does not permit talking.", 
 				new Object[] {getIden(), ChatColor.RED}, getColorPrefix());
 	}
+	
+	@Override
+	public void sendMessage(CommandSender sender, String message, Object[] args) {
+		Messaging.send(sender, "[$1]$2 This channel does not permit talking.", 
+				new Object[] {getIden(), ChatColor.RED}, getColorPrefix());
+	}
 
 	/**
 	 * Sends a message to all member players.
@@ -119,5 +126,5 @@ public class AnnouncementChannel extends ChatChannel {
 			//If there are no message to display, don't do anything.
 		}
 	}
-	
+
 }

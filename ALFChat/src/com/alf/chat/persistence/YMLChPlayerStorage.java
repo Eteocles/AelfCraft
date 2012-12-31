@@ -8,13 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.alf.chat.AlfChat;
 import com.alf.chat.ChPlayer;
+import com.alf.chat.util.Mail;
 
 /**
  * Stores ChPlayer information in YML flatfile.
@@ -51,12 +55,15 @@ public class YMLChPlayerStorage extends ChPlayerStorage {
 		File pFolder = new File(this.playerFolder, player.getName().toLowerCase().substring(0, 1));
 		pFolder.mkdirs();
 		
-		File playerFile = new File(pFolder, new StringBuilder().append(player.getName().toLowerCase()).append(".yml").toString());
+		File playerFile = new File(pFolder, player.getName().toLowerCase()+".yml");
 		
 		if (playerFile.exists()) {
 			Configuration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
 			ChPlayer cplayer = new ChPlayer(player);
+			
 			loadChannels(cplayer, playerConfig);
+			loadMail(cplayer, playerConfig);
+			
 			return cplayer;
 		}
 		//Otherwise, if not found, create new player.
@@ -89,6 +96,8 @@ public class YMLChPlayerStorage extends ChPlayerStorage {
 		
 		playerConfig.set("audience channels", new ArrayList<String>(player.getChannels()));
 		playerConfig.set("talk channel", player.getMainChannel());
+		saveMail(player, playerConfig);
+		
 		playerConfig.save(playerFile);
 		
 		return true;
@@ -103,6 +112,92 @@ public class YMLChPlayerStorage extends ChPlayerStorage {
 		List<String> channels = config.getStringList("audience channels");
 		player.setChannels(new HashSet<String>(channels));
 		player.setMainChannel(config.getString("talk channel"));
+	}
+	
+	/**
+	 * Save a player's mail.
+	 * @param player
+	 * @param config
+	 */
+	private void saveMail(ChPlayer player, Configuration config) {
+		ConfigurationSection section = config.getConfigurationSection("unread-mail");
+		if (section == null)
+			section = config.createSection("unread-mail");
+		Map<String, List<Mail>> mail = player.saveUnreadMail();
+		for (String s : mail.keySet())
+			section.set(s, getMailSave(mail.get(s)));
+		
+		section = config.getConfigurationSection("read-mail");
+		if (section == null)
+			section = config.createSection("read-mail");
+		mail = player.saveReadMail();
+		for (String s : mail.keySet())
+			section.set(s, getMailSave(mail.get(s)));
+	}
+	
+	/**
+	 * Convert the Mail list to a save-able String list.
+	 * @param mail
+	 * @return
+	 */
+	public static List<String> getMailSave(List<Mail> mail) {
+		List<String> mailBits = new ArrayList<String>();
+		for (Mail m : mail) {
+			String s = "";
+			if (m.attached != null)
+				s = m.message + "|||" + m.attached.getTypeId() + "|||" + m.attached.getAmount();
+			else
+				s = m.message;
+			mailBits.add(s);
+		}
+		return mailBits;
+	}
+	
+	/**
+	 * Load in mail from config.
+	 * @param player
+	 * @param config
+	 */
+	private void loadMail(ChPlayer player, Configuration config) {
+		if (config.getConfigurationSection("unread-mail") == null)
+			config.createSection("unread-mail");
+		if (config.getConfigurationSection("read-mail") == null)
+			config.createSection("read-mail");
+		
+		Map<String, List<Mail>> unreadMail = getMailBits(config.getConfigurationSection("unread-mail"));
+		Map<String, List<Mail>> readMail = getMailBits(config.getConfigurationSection("read-mail"));
+		player.loadMail(unreadMail, readMail);
+	}
+	
+	/**
+	 * Get the mail bits from a section.
+	 * @param section
+	 * @return
+	 */
+	public static Map<String, List<Mail>> getMailBits(ConfigurationSection section) {
+		Map<String, List<Mail>> mail = new HashMap<String, List<Mail>>();
+		try {
+			//Get the set of keys (sender names).
+			Set<String> keys = section.getKeys(false);
+			for (String name : keys) {
+				List<Mail> mailBits = new ArrayList<Mail>();
+				List<String> unparsed = section.getStringList(name);
+				for (String r : unparsed) {
+					String[] parts = r.split("|||");
+					Mail m;
+					if (r.contains("|||") && parts.length > 1)
+						m = new Mail(parts[0], new ItemStack(Material.getMaterial(Integer.parseInt(parts[1]))
+							, Integer.parseInt(parts[2])) );
+					else
+						m = new Mail(parts[0], null);
+					mailBits.add(m);
+				}
+				mail.put(name, mailBits);
+			}
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		return mail;
 	}
 
 	/**

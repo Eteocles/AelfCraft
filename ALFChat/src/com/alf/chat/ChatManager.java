@@ -4,7 +4,9 @@ import java.util.*;
 import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.alf.chat.channel.AnnouncementChannel;
@@ -12,6 +14,7 @@ import com.alf.chat.channel.ChatChannel;
 import com.alf.chat.channel.NormalChannel;
 import com.alf.chat.persistence.ChPlayerStorage;
 import com.alf.chat.persistence.YMLChPlayerStorage;
+import com.alf.chat.util.Mail;
 import com.alf.util.Messaging;
 
 /**
@@ -27,11 +30,13 @@ public class ChatManager {
 	private Map<String, ChPlayer> players;
 	//Storage.
 	private ChPlayerStorage playerStorage;
+	//Pending mail for offline players.
+	private Map<String,Map<String, List<Mail>>> pendingMail;
 	//Filtered words.
-	private Set<String> bannedPhrases;
-	//
-	private List<String> censors;
-	//Threshold for caps limit.
+//	private Set<String> bannedPhrases;
+//	//
+//	private List<String> censors;
+//	//Threshold for caps limit.
 	private static double CAPS_THRESHOLD = 75;
 	//Number of milliseconds between slow-chat messages.
 	public static long SLOW_INTERVAL = 15000L;
@@ -49,7 +54,8 @@ public class ChatManager {
 		this.chatChannels = new HashMap<String, ChatChannel>();
 		this.players= new HashMap<String, ChPlayer>();
 		this.playerStorage = new YMLChPlayerStorage(plugin);
-		this.bannedPhrases = new HashSet<String>();
+		this.pendingMail = new HashMap<String, Map<String, List<Mail>>>();
+//		this.bannedPhrases = new HashSet<String>();
 	}
 	
 	/**
@@ -303,6 +309,49 @@ public class ChatManager {
 	}
 	
 	/**
+	 * Get the pending mail.
+	 * @return
+	 */
+	public Map<String, Map<String, List<Mail>>> getPendingMail() {
+		return this.pendingMail;
+	}
+	
+	/**
+	 * Send a player mail.
+	 * @param sender
+	 * @param recipient
+	 * @param mail
+	 */
+	public boolean sendMail(CommandSender sender, String recipient, Mail mail) {
+		if (sender instanceof Player) {
+			Player player = this.plugin.getServer().getPlayer(recipient);
+			if (player == null) {
+				Map<String, List<Mail>> specMail = pendingMail.get(recipient);
+				if (specMail == null)
+					specMail = new HashMap<String, List<Mail>>();
+				
+				List<Mail> mailList = specMail.get(sender.getName());
+				if (mailList == null)
+					mailList = new ArrayList<Mail>();
+				
+				mailList.add(mail);
+				specMail.put(sender.getName(), mailList);
+				pendingMail.put(recipient, specMail);
+			} else {
+				getChPlayer(player).sendMail((Player)sender, mail);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void loadFromPendingMail(Player player) {
+		if (pendingMail.containsKey(player.getName())) {
+			getChPlayer(player).loadMail(pendingMail.get(player.getName()), new HashMap<String, List<Mail>>());
+		}
+	}
+	
+	/**
 	 * Get a String representation of all of the channels.
 	 * @param player
 	 * @return
@@ -324,8 +373,27 @@ public class ChatManager {
 	}
 	
 	public void loadFilters(Configuration config) {
-		this.bannedPhrases = new HashSet<String>(config.getStringList("banned-phrases"));
-		this.censors = config.getStringList("censor-replacements");
+//		this.bannedPhrases = new HashSet<String>(config.getStringList("banned-phrases"));
+//		this.censors = config.getStringList("censor-replacements");
+	}
+	
+	/**
+	 * Load pending-mail from configuration.
+	 * @param config
+	 */
+	public void loadMail(Configuration config) {
+		//Configuration is saved in such a way that each configuration section is bound by the recipient's name.
+		//Then there are subsections for senders and their mail messages.
+		Set<String> recKeys = config.getKeys(false);
+		for (String recipient : recKeys) {
+			ConfigurationSection senders = config.getConfigurationSection(recipient);
+			Map<String, List<Mail>> senderMail = YMLChPlayerStorage.getMailBits(senders);
+			this.pendingMail.put(recipient, senderMail);
+		}
+	}
+	
+	public void saveMailToConfig() {
+		this.plugin.getConfigManager().saveMailConfig(this.pendingMail);
 	}
 	
 	/**
@@ -422,14 +490,14 @@ public class ChatManager {
 		boolean censored = false;
 		
 		//Check for profanity.
-		String trimmedMessage = message.replaceAll("\\W", "").toLowerCase();
-		for (String s : bannedPhrases) {
-			if (trimmedMessage.contains(s)) {
-				message = this.censors.get((int)(Math.random() * censors.size()));		
-				censored = true;
-				break;
-			}
-		}
+//		String trimmedMessage = message.replaceAll("\\W", "").toLowerCase();
+//		for (String s : bannedPhrases) {
+//			if (trimmedMessage.contains(s)) {
+//				message = this.censors.get((int)(Math.random() * censors.size()));		
+//				censored = true;
+//				break;
+//			}
+//		}
 		
 		if (capsPercentage >= CAPS_THRESHOLD || censored) {
 			if (player.getPlayer().hasPermission("alfchat.filter.bypass") || player.getPlayer().isOp())
@@ -446,5 +514,6 @@ public class ChatManager {
 	 */
 	public void shutdown() {
 		this.playerStorage.shutdown();
+		this.saveMailToConfig();
 	}
 }

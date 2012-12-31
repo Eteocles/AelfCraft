@@ -2,6 +2,7 @@ package com.alf.chat.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import com.alf.chat.AlfChat;
@@ -33,7 +34,20 @@ public class ChannelCommand extends BasicCommand {
 	 */
 	public boolean execute(CommandSender cs, String identifier, String[] args) {
 		if (! (cs instanceof Player))
-			return false;
+			if (cs instanceof ConsoleCommandSender) {
+				if (args.length > 1) {
+					ChatChannel ch = plugin.getChatManager().getChannel(args[0]);
+					if (ch != null) {
+						String message = "";
+						for (int i = 1; i < args.length; i++)
+							message += args[i] + " ";
+						ch.sendMessage(cs, message, new Object[0]);
+					} else {
+						Messaging.send(cs, "That channel does not exist!", new Object[0], ChatColor.RED);
+					}
+				}
+				return true;
+			} else return false;
 		
 		Player player = (Player) cs;
 		if (args.length != 0) {

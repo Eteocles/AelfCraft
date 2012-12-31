@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.alf.chat.ChPlayer;
@@ -133,6 +134,8 @@ public abstract class ChatChannel {
 	 * @param args - regular expressions
 	 */
 	public abstract void sendMessage(ChPlayer sender, String message, Object[] args);
+	
+	public abstract void sendMessage(CommandSender sender, String message, Object[] args);
 	
 	/**
 	 * Sends a message to all players in the channel. Used for announcements or by moderators/admins.

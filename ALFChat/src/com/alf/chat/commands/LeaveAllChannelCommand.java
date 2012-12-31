@@ -1,5 +1,7 @@
 package com.alf.chat.commands;
 
+import java.util.Set;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -32,7 +34,8 @@ public class LeaveAllChannelCommand extends BasicCommand {
 		
 		ChPlayer player = this.plugin.getChatManager().getChPlayer((Player) cs);
 		if (player.hasChannels()) {
-			for (String s : player.getChannels()) {
+			Set<String> channels = player.getChannels();
+			for (String s : channels) {
 				this.plugin.getChatManager().removePlayerFromChannelAudience((Player)cs, s);
 			}
 			player.setMainChannel(null);

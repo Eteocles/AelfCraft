@@ -17,6 +17,9 @@ commands:
     aliases: ['mychannels']
     description: List player's current channels
     usage: /<command>
+  mail:
+    description: General mail commands
+    usage: /<command> <args>
 permissions:
   alfchat.*:
     description: Gives access to administration commands for AlfChat

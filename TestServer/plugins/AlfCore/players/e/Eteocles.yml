@@ -1,0 +1,11 @@
+class: Citizen
+verbose: true
+suppressed: []
+mana: 75
+health: 20
+skill-settings: {}
+cooldowns: {}
+experience: {}
+binds:
+  DIAMOND_SWORD: IceSphere
+  BONE: Shout

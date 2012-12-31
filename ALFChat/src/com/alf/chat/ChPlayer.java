@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.alf.chat.channel.ChatChannel;
+import com.alf.chat.util.Mail;
 import com.alf.util.Messaging;
 
 /**
@@ -15,22 +16,22 @@ import com.alf.util.Messaging;
  * Holds flags for chat plugin.
  */
 public class ChPlayer {
-	/*Channel information.*/
 	//Talking channel.
 	private String mainChannel;
 	//All channels.
 	private Set<String> channels;
-	
 	/* Slow chat toggle */
 	private boolean slowChat; 
 	private long slowChatStart = -1;
-	
 	//Name
 	private String name;
 	//Player object.
 	private Player player;
 	//Last time of player chat.
 	private long lastChatTime = -1;
+	//Maps player name to mail.
+	private Map<String, List<Mail>> unreadMail = new HashMap<String, List<Mail>>();
+	private Map<String, List<Mail>> readMail = new HashMap<String, List<Mail>>();
 	
 	/**
 	 * Constructs the ChPlayer.
@@ -182,6 +183,72 @@ public class ChPlayer {
 			Messaging.send(this.player, "Slow chat mode disabled.", new Object[0]);
 			slowChatStart = -1;
 		}
+	}
+	
+	/**
+	 * Send player mail!
+	 * @param player
+	 * @param message
+	 */
+	public void sendMail(Player player, Mail mail) {
+		List<Mail> pendingMail = this.unreadMail.get(player.getName());
+		if (pendingMail == null)
+			pendingMail = new ArrayList<Mail>();
+		pendingMail.add(mail);
+		this.unreadMail.put(player.getName(), pendingMail);
+		notifyPlayerMail();
+	}
+	
+	/**
+	 * Notify a player of mail.
+	 */
+	public void notifyPlayerMail() {
+		if (! this.unreadMail.isEmpty()) {
+			int size = 0;
+			for (String s : unreadMail.keySet())
+				size += unreadMail.get(s).size();
+			Messaging.send(getPlayer(), "You have $1 unread messages!", new Object[] { size }, ChatColor.GOLD);
+		}
+	}
+	
+	/**
+	 * Read player mail.
+	 * @param name
+	 * @return
+	 */
+	public List<Mail> readMail(String name) {
+		List<Mail> pendingMail = this.unreadMail.remove(name);
+		this.readMail.put(name, pendingMail);
+		
+		return pendingMail;
+	}
+	
+	/**
+	 * Load in mail from config call.
+	 * @param unread
+	 * @param read
+	 */
+	public void loadMail(Map<String, List<Mail>> unread, Map<String, List<Mail>> read) {
+		this.unreadMail.putAll(unread);
+		this.readMail.putAll(read);
+	}
+	
+	/**
+	 * Save the unread mail.
+	 * Called from the Player Storage.
+	 * @return
+	 */
+	public Map<String, List<Mail>> saveUnreadMail() {
+		return this.unreadMail;
+	}
+	
+	/**
+	 * Saave the read mail.
+	 * Called from the Player Storage.
+	 * @return
+	 */
+	public Map<String, List<Mail>> saveReadMail() {
+		return this.readMail;
 	}
 	
 	/**

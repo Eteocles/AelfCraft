@@ -1,10 +1,16 @@
 package com.alf.chat;
 
 import java.io.*;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import com.alf.chat.persistence.YMLChPlayerStorage;
+import com.alf.chat.util.Mail;
 
 /**
  * Handles AlfChat configuration.
@@ -17,9 +23,12 @@ public class ConfigManager {
 	protected static File filterConfigFile;
 	//Channels
 	protected static File channelConfigFile;
+	//Pending mail
+	protected static File pendingMailConfigFile;
 	
 	private static Configuration filterConfig;
 	private static Configuration channelConfig;
+	private static Configuration pendingMailConfig;
 	
 	/**
 	 * Constructs a Config Manager.
@@ -30,11 +39,13 @@ public class ConfigManager {
 		File dataFolder = plugin.getDataFolder();
 		filterConfigFile = new File(dataFolder, "filters.yml");
 		channelConfigFile = new File(dataFolder, "channels.yml");
+		pendingMailConfigFile = new File(dataFolder, "pending-mail.yml");
 	}
 	
 	public void load() throws Exception {
 		checkForConfig(filterConfigFile);
 		checkForConfig(channelConfigFile);
+		checkForConfig(pendingMailConfigFile);
 	}
 	
 	/**
@@ -58,9 +69,34 @@ public class ConfigManager {
 			channelConfig.setDefaults(defConfig);
 		}
 		
+		pendingMailConfig = YamlConfiguration.loadConfiguration(pendingMailConfigFile);
+		defConfigStream = this.plugin.getResource("defaults" + File.separator + "pending-mail.yml");
+		if (defConfigStream != null) {
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			pendingMailConfig.setDefaults(defConfig);
+		}
+		
 		this.plugin.getChatManager().loadChannels(channelConfig);
 		this.plugin.getChatManager().loadFilters(filterConfig);
+		this.plugin.getChatManager().loadMail(pendingMailConfig);
 		return true;
+	}
+	
+	/**
+	 * Save mail configuration.
+	 * @param pendingMail
+	 */
+	public void saveMailConfig(Map<String, Map<String, List<Mail>>> pendingMail) {
+		for (String recipient : pendingMail.keySet()) {
+			Map<String, List<Mail>> senders = pendingMail.get(recipient);
+			ConfigurationSection section = pendingMailConfig.getConfigurationSection(recipient);
+			if (section == null)
+				pendingMailConfig.createSection(recipient);
+			for (String sender : senders.keySet()) {
+				List<String> messages = YMLChPlayerStorage.getMailSave(senders.get(sender));
+				section.set(sender, messages);
+			}
+		}
 	}
 	
 	/**

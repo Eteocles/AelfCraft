@@ -1,5 +1,6 @@
 package com.alf.chat.listener;
 
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.alf.chat.AlfChat;
 import com.alf.chat.ChPlayer;
 import com.alf.chat.ChatManager;
+import com.alf.chat.channel.ChatChannel;
 import com.alf.util.Messaging;
 
 /**
@@ -54,7 +56,12 @@ public class ChPlayerListener implements Listener {
 		String mainChannel = player.getMainChannel();
 		if (mainChannel != null) {
 			//Check message for filters and profanity.
-			cm.getChannel(mainChannel).sendMessage(player, cm.filter(event.getMessage(), player), new Object[0]);
+			String filtered = cm.filter(event.getMessage(), player);
+			ChatChannel main = cm.getChannel(mainChannel);
+			main.sendMessage(player, filtered, new Object[0]);
+			Messaging.send(this.plugin.getServer().getConsoleSender(), "[$1]$2 $3: "+filtered, new Object[] {
+				main.getIden(), ChatColor.WHITE, player.getPlayer().getDisplayName()
+			}, main.getColorPrefix());
 			player.updateChatTime();
 		} else {
 			Messaging.send(player.getPlayer(), "You are not in any channels!", new Object[0], ChatColor.GRAY);
@@ -77,6 +84,9 @@ public class ChPlayerListener implements Listener {
 				channelList += ChatColor.DARK_AQUA + channel + " " + ChatColor.AQUA;
 			else channelList += channel + " ";
 		}
+
+		cm.loadFromPendingMail(event.getPlayer());
+		
 		event.getPlayer().sendMessage(channelList);
 	}
 
@@ -91,4 +101,5 @@ public class ChPlayerListener implements Listener {
 		cm.saveChPlayer(player, true);
 		cm.removePlayer(player);
 	}
+	
 }
