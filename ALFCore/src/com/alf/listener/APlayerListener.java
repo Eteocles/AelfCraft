@@ -1,7 +1,6 @@
 package com.alf.listener;
 
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -23,7 +22,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import com.alf.AlfCore;
@@ -39,7 +37,6 @@ import com.alf.util.Messaging;
 import com.alf.util.DeathManager.PlayerInventoryStorage;
 import com.alf.util.DeathManager.StoredItemStack;
 import com.alf.util.Properties;
-import com.alf.util.Util;
 
 /**
  * Handle player related events.
@@ -110,6 +107,9 @@ public class APlayerListener implements Listener {
 		if (alf.isInCombat())
 			alf.leaveCombat(CombatEffect.LeaveCombatReason.LOGOUT);
 		
+		if (alf.getPet() != null)
+			alfManager.removePet(alf.getPet());
+		
 		alfManager.saveAlf(alf, true);
 		alfManager.removeAlf(alf);
 		
@@ -139,12 +139,12 @@ public class APlayerListener implements Listener {
 			//Restore items or drop them if needed.
 			for (StoredItemStack is : inv) {
 				//If spot is occupied...
-				if (playerInv.getItem(is.getSlot()) != null) {
-					HashMap<Integer, ItemStack> leftovers = playerInv.addItem(new ItemStack[] { is.getItem() });
-					if (leftovers.size() > 0)
-		            	Util.dropItems(player.getLocation(), leftovers, false);
-				} 		           
-				else 
+//				if (playerInv.getItem(is.getSlot()) != null) {
+//					HashMap<Integer, ItemStack> leftovers = playerInv.addItem(new ItemStack[] { is.getItem() });
+//					if (leftovers.size() > 0)
+//		            	Util.dropItems(player.getLocation(), leftovers, false);
+//				} 		           
+//				else 
 	            	playerInv.setItem(is.getSlot(), is.getItem());
 			}
 			AlfCore.log(Level.INFO, "Death Manager restored " + inv.size() + " item stacks to " +

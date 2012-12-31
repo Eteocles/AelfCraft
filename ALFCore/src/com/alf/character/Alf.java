@@ -62,6 +62,8 @@ public class Alf extends CharacterTemplate {
 	private Map<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	//Set of summons.
 	private Set<Monster> summons = new HashSet<Monster>();
+	//Pet
+	private Pet pet;
 	//Binds
 	private Map<Material, String[]> binds = new ConcurrentHashMap<Material, String[]>();
 	//Suppressed Skills (Can't be used)
@@ -245,6 +247,22 @@ public class Alf extends CharacterTemplate {
 		else if (! this.name.equals(other.name))
 			return false;
 		return true;
+	}
+	
+	/**
+	 * Get the pet.
+	 * @return
+	 */
+	public Pet getPet() {
+		return this.pet;
+	}
+	
+	/**
+	 * Set the pet.
+	 * @param pet
+	 */
+	public void setPet(Pet pet) {
+		this.pet = pet;
 	}
 
 	/**

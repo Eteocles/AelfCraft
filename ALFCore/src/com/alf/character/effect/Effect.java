@@ -78,6 +78,9 @@ public class Effect {
 			applyToAlf((Alf) character);
 		else if (character instanceof Monster)
 			applyToMonster((Monster) character);
+		else {
+			this.applyTime = System.currentTimeMillis();
+		}
 	}
 
 	/**

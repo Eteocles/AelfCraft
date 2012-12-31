@@ -45,6 +45,7 @@ public class CharacterManager {
 	private ConcurrentLinkedQueue<Entity> entityQueue;
 	private List<Alf> completedSkills;
 	private Map<UUID, Monster> monsters;
+	private Map<UUID, Pet> pets;
 	private int taskId = 0;
 
 	/**
@@ -56,6 +57,7 @@ public class CharacterManager {
 		this.alfs = new HashMap<String, Alf>();
 		this.entityQueue = new ConcurrentLinkedQueue<Entity>();
 		this.monsters = new ConcurrentHashMap<UUID, Monster>();
+		this.pets = new ConcurrentHashMap<UUID, Pet>();
 		this.taskId = plugin.getServer().getScheduler().runTaskTimerAsynchronously(
 				plugin, new EntityReaper(), 100L, 100L).getTaskId();
 
@@ -83,6 +85,8 @@ public class CharacterManager {
 	 */
 	public void shutdown() {
 		this.alfStorage.shutdown();
+		for (Pet p : pets.values())
+			p.getEntity().remove();
 		Bukkit.getScheduler().cancelTask(this.taskId);
 	}
 
@@ -108,6 +112,19 @@ public class CharacterManager {
 		this.monsters.put(id, monster);
 		return true;
 	}
+	
+	/**
+	 * Add a pet to the manager.
+	 * @param pet
+	 * @return
+	 */
+	public boolean addPet(Pet pet) {
+		UUID id = pet.getEntity().getUniqueId();
+		if (this.pets.containsKey(id))
+			return false;
+		this.pets.put(id, pet);
+		return true;
+	}
 
 	/**
 	 * Get the encapsulating character type.
@@ -117,7 +134,18 @@ public class CharacterManager {
 	public CharacterTemplate getCharacter(LivingEntity lEntity) {
 		if (lEntity instanceof Player) 
 			return getAlf((Player) lEntity);
+		else if (this.pets.containsKey(lEntity.getUniqueId()))
+			return getPet(lEntity);
 		return getMonster(lEntity);
+	}
+	
+	/**
+	 * Get the encapsulating pet.
+	 * @param lEntity
+	 * @return
+	 */
+	public Pet getPet(LivingEntity lEntity) {
+		return this.pets.get(lEntity.getUniqueId());
 	}
 
 	/**
@@ -238,6 +266,17 @@ public class CharacterManager {
 			Monster monster = (Monster) this.monsters.remove(lEntity.getUniqueId());
 			monster.clearEffects();
 			monster.getEntity().remove();
+		}
+	}
+	
+	/**
+	 * Remove the pet.
+	 * @param pet
+	 */
+	public void removePet(Pet pet) {
+		if (this.pets.containsKey(pet.getEntity().getUniqueId())) {
+			this.pets.remove(pet);
+			pet.getEntity().remove();
 		}
 	}
 

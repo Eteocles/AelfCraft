@@ -26,6 +26,9 @@ commands:
     aliases: ['stfu', 'quiet']
     description: Toggle Aelf output
     usage: /<command>
+  pet:
+    description: Pet commands
+    usage: /<command> <args>
 permissions:
   alfcore.admin.*:
     description: Gives access to administration commands for AlfCore

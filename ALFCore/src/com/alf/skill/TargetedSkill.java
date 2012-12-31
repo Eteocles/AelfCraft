@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -39,6 +40,14 @@ public abstract class TargetedSkill extends ActiveSkill {
 	public TargetedSkill(AlfCore plugin, String name) {
 		super(plugin, name);
 	}
+	
+	  public ConfigurationSection getDefaultConfig()
+	  {
+	    ConfigurationSection section = super.getDefaultConfig();
+	    section.set(Setting.USE_TEXT.node(), "%alf% used %skill% on %target%!");
+	    section.set(Setting.MAX_DISTANCE.node(), Integer.valueOf(15));
+	    return section;
+	  }
 
 	/**
 	 * Initiate the targeted skill.
@@ -46,10 +55,10 @@ public abstract class TargetedSkill extends ActiveSkill {
 	public void init() {
 		String useText = SkillConfigManager.getRaw(this, Setting.USE_TEXT.node(),
 				"%alf% used %skill% on %target%!");
-		useText = useText.replace("%alf%",  "$1").replace("%kill%", "$2").replace("%target%", "$3");
+		useText = useText.replace("%alf%",  "$1").replace("%skill%", "$2").replace("%target%", "$3");
 		setUseText(useText);
 	}
-	
+
 	/**
 	 * Broadcast that an Alf has used a targeted skill.
 	 * @param alf
@@ -58,11 +67,11 @@ public abstract class TargetedSkill extends ActiveSkill {
 	protected void broadcastExecuteText(Alf alf, LivingEntity target) {
 		Player player = alf.getPlayer();
 		broadcast(player.getLocation(), getUseText(), 
-				new Object[] {player.getDisplayName(), getName(), target == player ? "themself" : 
-					getEntityName(target)
-			});
+				new Object[] {
+			player.getDisplayName(), getName(), target == player ? "themself" : getEntityName(target)
+		});
 	}
-	
+
 	/**
 	 * Get the given entity's name.
 	 * @param entity
@@ -72,11 +81,7 @@ public abstract class TargetedSkill extends ActiveSkill {
 		return (entity instanceof Player) ? ((Player)entity).getName() :
 			entity.getClass().getSimpleName().substring(5);
 	}
-	
-//	public static LivingEntity getPlayerTarget(Player player, int maxDistance) {
-//		
-//	}
-	
+
 	/**
 	 * Upon invocation of this Skill, determine the targeted entity.
 	 * @param alf
@@ -116,7 +121,7 @@ public abstract class TargetedSkill extends ActiveSkill {
 				return null;
 			}
 		}
-		
+
 		if (target == null) {
 			target = getPlayerTarget(player, maxDistance);
 			if (isType(SkillType.HEAL)){
@@ -127,13 +132,13 @@ public abstract class TargetedSkill extends ActiveSkill {
 				target = null;
 			}
 		}
-		
+
 		if (target == null) {
 			if (isType(SkillType.HARMFUL))
 				return null;
 			target = player;
 		}
-		
+
 		if (isType(SkillType.HARMFUL) && (player.equals(target) || 
 				alf.getSummons().contains(target) || ! damageCheck(player, target))) {
 			Messaging.send(player, "Sorry,  you can't damage that target!", new Object[0]);
@@ -141,7 +146,7 @@ public abstract class TargetedSkill extends ActiveSkill {
 		}
 		return target;
 	}
-	
+
 	/**
 	 * Get a player's target.
 	 * @param player
@@ -166,13 +171,13 @@ public abstract class TargetedSkill extends ActiveSkill {
 					((LivingEntity)entity).getHealth() != 0 &&
 					locs.contains(entity.getLocation().getBlock().getLocation())) {
 				if (! (entity instanceof Player) || player.canSee((Player) entity))
-						return (LivingEntity) entity;
+					return (LivingEntity) entity;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Set the delayed targeting skill for the given Alf.
 	 * Takes a player's target and begins the use of a delayed targeting skill.
@@ -181,23 +186,23 @@ public abstract class TargetedSkill extends ActiveSkill {
 		Player player = alf.getPlayer();
 		int maxDistance = SkillConfigManager.getUseSetting(alf, this, Setting.MAX_DISTANCE, 15, false);
 		LivingEntity target = getTarget(alf, maxDistance, args);
-		
+
 		if (target == null)
 			return false;
 		if (args.length > 1 && target != null)
 			args = (String[]) Arrays.copyOfRange(args, 1, args.length);
-		
+
 		DelayedSkill dSkill = new DelayedTargetedSkill(identifier, player, delay, this, target, args);
-		
+
 		broadcast(player.getLocation(), "$1 begins to use $2 on $3!", new Object[] { 
 			player.getDisplayName(), getName(), Messaging.getLivingEntityName(target)
 		});
-		
+
 		this.plugin.getCharacterManager().getDelayedSkills().put(alf, dSkill);
 		alf.setDelayedSkill(dSkill);
 		return true;
 	}
-	
+
 	/**
 	 * Whether a player is in the line of sight of another player.
 	 * @param a
@@ -209,14 +214,14 @@ public abstract class TargetedSkill extends ActiveSkill {
 			return true;
 		Location aLoc = a.getEyeLocation();
 		Location bLoc = b.getEyeLocation();
-		
+
 		int distance = (int) aLoc.distance(bLoc);
 		if (distance > 120)
 			return false;
-		
+
 		Vector ab = new Vector(bLoc.getX() - aLoc.getX(), bLoc.getY() - aLoc.getY(), 
 				bLoc.getZ() - aLoc.getZ());
-		
+
 		try {
 			Iterator<Block> iterator = new BlockIterator(a.getWorld(), aLoc.toVector(), ab, 0.0D, 
 					distance + 1);
@@ -233,7 +238,7 @@ public abstract class TargetedSkill extends ActiveSkill {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Use the TargetedSkill.
 	 * @param alf
@@ -242,7 +247,7 @@ public abstract class TargetedSkill extends ActiveSkill {
 	 * @return
 	 */
 	public abstract SkillResult use(Alf alf, LivingEntity target, String[] args);
-	
+
 	/**
 	 * The given Alf uses the skill.
 	 */
@@ -256,15 +261,15 @@ public abstract class TargetedSkill extends ActiveSkill {
 			return SkillResult.INVALID_TARGET_NO_MSG;
 		}
 		LivingEntity target = getTarget(alf, maxDistance, args);
-		
+
 		if (target == null)
 			return SkillResult.INVALID_TARGET_NO_MSG;
-		
+
 		if (args.length > 1 && target != null)
 			args = (String[]) Arrays.copyOfRange(args, 1, args.length);
-		
+
 		SkillResult result = use(alf, target, args);
-		
+
 		if (isType(SkillType.INTERRUPT) && result.equals(SkillResult.NORMAL) && target instanceof
 				Player) {
 			Alf tAlf = this.plugin.getCharacterManager().getAlf((Player) target);
@@ -273,10 +278,10 @@ public abstract class TargetedSkill extends ActiveSkill {
 				tAlf.setCooldown("global", AlfCore.properties.globalCooldown);
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * The given Alf uses this delayed tpe skill.
 	 * @param alf
@@ -290,18 +295,18 @@ public abstract class TargetedSkill extends ActiveSkill {
 			Messaging.send(alf.getPlayer(), "You can't target anything while blinded!", new Object[0]);
 			return SkillResult.INVALID_TARGET_NO_MSG;
 		}
-		
+
 		int maxDistance = SkillConfigManager.getUseSetting(alf, this, Setting.MAX_DISTANCE, 15, false);
 		maxDistance *= maxDistance;
-		
+
 		if (!player.getWorld().equals(target.getWorld()) || 
 				player.getLocation().distanceSquared(target.getLocation()) > maxDistance) {
 			Messaging.send(player, "Target is out of range!", new Object[0]);
 			return SkillResult.FAIL;
 		}
-		
+
 		SkillResult result = use(alf, target, args);
-		
+
 		if (isType(SkillType.INTERRUPT) && result.equals(SkillResult.NORMAL) &&
 				target instanceof Player) {
 			Alf tAlf = this.plugin.getCharacterManager().getAlf((Player) target);

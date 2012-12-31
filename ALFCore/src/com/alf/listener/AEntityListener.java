@@ -296,12 +296,21 @@ public class AEntityListener implements Listener {
 	 * Handle creature spawning.
 	 * @param event
 	 */
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
-		if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER) {
+		CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
+		if (reason == CreatureSpawnEvent.SpawnReason.SPAWNER) {
 			Monster monster = new Monster(this.plugin, event.getEntity());
 			monster.setSpawnReason(event.getSpawnReason());
 			this.plugin.getCharacterManager().addMonster(monster);
+		} 
+		else if (reason == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG) {
+			
 		}
+		else if (reason == CreatureSpawnEvent.SpawnReason.CUSTOM) {
+			
+		}
+		else event.setCancelled(true);
 	}
 
 	/**

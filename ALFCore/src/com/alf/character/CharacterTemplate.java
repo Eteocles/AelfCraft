@@ -76,6 +76,7 @@ public abstract class CharacterTemplate {
 		
 		//Store the effect.
 		this.effects.put(effect.getName().toLowerCase(), effect);
+		effect.apply(this);
 	}
 	
 	/**

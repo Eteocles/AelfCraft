@@ -32,6 +32,7 @@ import com.alf.command.commands.PartyLeadCommand;
 import com.alf.command.commands.PartyLeaveCommand;
 import com.alf.command.commands.PartyModeCommand;
 import com.alf.command.commands.PartyWhoCommand;
+import com.alf.command.commands.PetKillCommand;
 import com.alf.command.commands.ShushCommand;
 import com.alf.listener.ADamageListener;
 import com.alf.listener.AEntityListener;
@@ -280,6 +281,7 @@ public class AlfCore extends AlfPlugin {
 		cp.addCommand(new PartyLeaveCommand(this));
 		cp.addCommand(new PartyModeCommand(this));
 		cp.addCommand(new PartyWhoCommand(this));
+		cp.addCommand(new PetKillCommand(this));
 	}
 
 	protected void registerEvents() {

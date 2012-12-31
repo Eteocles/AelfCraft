@@ -213,12 +213,24 @@ public class ADamageListener implements Listener {
 		//If the atttacker was an entity, get the attacking entity.
 		if (event instanceof EntityDamageByEntityEvent) {
 			attacker = ((EntityDamageByEntityEvent)event).getDamager();
+			if (this.plugin.getCharacterManager().getPet((LivingEntity)attacker) != null) {
+				event.setDamage(0);
+				event.setCancelled(true);
+				return;
+			}
 		}
 		
 		//Cancel handling if defender is dead or in creative mode.
 		if (defender instanceof LivingEntity) {
 			if (defender.isDead() || ((LivingEntity)defender).getHealth() <= 0)
 				return;
+			
+			if (this.plugin.getCharacterManager().getPet((LivingEntity)defender) != null) {
+				event.setDamage(0);
+				event.setCancelled(true);
+				return;
+			}
+			
 			if (defender instanceof Player) {
 				Player player = (Player) defender;
 				if (player.getGameMode() == GameMode.CREATIVE)
