@@ -43,6 +43,9 @@ properties:
     food-heal-percent: .05 #total percentage of health regained when full
     slow-while-casting: true
     combat-time: 10000 #milli-seconds
+    mysql_username: user
+    mysql_password: pass
+    mysql_database: dbname
 mana:
     interval: 5
     percent: 5
