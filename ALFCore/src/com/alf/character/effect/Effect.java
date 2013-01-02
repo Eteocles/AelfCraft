@@ -2,15 +2,16 @@ package com.alf.character.effect;
 
 import java.util.*;
 
-import net.minecraft.server.v1_4_5.EntityLiving;
-import net.minecraft.server.v1_4_5.EntityPlayer;
-import net.minecraft.server.v1_4_5.MobEffect;
-import net.minecraft.server.v1_4_5.Packet41MobEffect;
-import net.minecraft.server.v1_4_5.Packet42RemoveMobEffect;
+
+import net.minecraft.server.v1_4_6.EntityLiving;
+import net.minecraft.server.v1_4_6.EntityPlayer;
+import net.minecraft.server.v1_4_6.MobEffect;
+import net.minecraft.server.v1_4_6.Packet41MobEffect;
+import net.minecraft.server.v1_4_6.Packet42RemoveMobEffect;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -110,7 +111,7 @@ public class Effect {
 			for (PotionEffect pEffect : this.potionEffects)
 				p.addPotionEffect(pEffect);
 			for (MobEffect mEffect : this.mobEffects)
-				ePlayer.netServerHandler.sendPacket(new Packet41MobEffect(ePlayer.id, mEffect));
+				ePlayer.playerConnection.sendPacket(new Packet41MobEffect(ePlayer.id, mEffect));
 		}
 	}
 
@@ -124,7 +125,7 @@ public class Effect {
 		for (PotionEffect pEffect : this.potionEffects)
 			p.addPotionEffect(pEffect);
 		for (MobEffect mEffect : this.mobEffects)
-			ePlayer.netServerHandler.sendPacket(new Packet41MobEffect(ePlayer.id, mEffect));
+			ePlayer.playerConnection.sendPacket(new Packet41MobEffect(ePlayer.id, mEffect));
 	}
 
 	/**
@@ -149,14 +150,14 @@ public class Effect {
 			p = alf.getPlayer();
 			for (PotionEffect pEffect : this.potionEffects) {
 				p.removePotionEffect(pEffect.getType());
-				ePlayer.netServerHandler.sendPacket(
+				ePlayer.playerConnection.sendPacket(
 						new Packet42RemoveMobEffect(ePlayer.id, 
 								new MobEffect(pEffect.getType().getId(), pEffect.getDuration())));
 			}
 		}
 		if (! this.mobEffects.isEmpty())
 			for (MobEffect mEffect : this.mobEffects)
-				ePlayer.netServerHandler.sendPacket(new Packet42RemoveMobEffect(ePlayer.id, mEffect));
+				ePlayer.playerConnection.sendPacket(new Packet42RemoveMobEffect(ePlayer.id, mEffect));
 	}
 
 	/**

@@ -7,26 +7,27 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
-import net.minecraft.server.v1_4_5.DamageSource;
-import net.minecraft.server.v1_4_5.EntityBlaze;
-import net.minecraft.server.v1_4_5.EntityEnderman;
-import net.minecraft.server.v1_4_5.EntityGiantZombie;
-import net.minecraft.server.v1_4_5.EntityGolem;
-import net.minecraft.server.v1_4_5.EntityLiving;
-import net.minecraft.server.v1_4_5.EntityMonster;
-import net.minecraft.server.v1_4_5.EntityPlayer;
-import net.minecraft.server.v1_4_5.EntitySilverfish;
-import net.minecraft.server.v1_4_5.EntitySpider;
+import net.minecraft.server.v1_4_6.DamageSource;
+import net.minecraft.server.v1_4_6.EntityBlaze;
+import net.minecraft.server.v1_4_6.EntityEnderman;
+import net.minecraft.server.v1_4_6.EntityGiantZombie;
+import net.minecraft.server.v1_4_6.EntityGolem;
+import net.minecraft.server.v1_4_6.EntityLiving;
+import net.minecraft.server.v1_4_6.EntityMonster;
+import net.minecraft.server.v1_4_6.EntityPlayer;
+import net.minecraft.server.v1_4_6.EntitySilverfish;
+import net.minecraft.server.v1_4_6.EntitySpider;
 
 import org.bukkit.Bukkit;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_4_5.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_6.event.CraftEventFactory;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -54,10 +55,12 @@ public abstract class Skill extends BasicCommand {
 	private static Random random = new Random();
 	private final Set<SkillType> types = EnumSet.noneOf(SkillType.class);
 	private static Field ldbpt;
+	private FireworkEffect fireworkEffect;
 	
-	public Skill(AlfCore plugin, String name) {
+	public Skill(AlfCore plugin, String name, FireworkEffect fe) {
 		super(name);
 		this.plugin = plugin;
+		this.fireworkEffect = fe;
 	}
 	
 	/**
@@ -169,8 +172,8 @@ public abstract class Skill extends BasicCommand {
 		double d0 = aEL.locX - el.locX, d1;
 		for (d1 = aEL.locZ - el.locZ; d0 * d0 + d1 * d1 < 0.0001D; d1 = (Math.random() - Math.random()) * 0.01D)
 			d0 = (Math.random() - Math.random()) * 0.01D;
-		//el.deathTime flag. Change from aW to aX in 1.4.6
-		el.aW = ((float)(Math.atan2(d1, d0) * 180.0D / Math.PI) - el.yaw);
+		//el.deathTime flag.
+		el.aX = ((float)(Math.atan2(d1, d0) * 180.0D / Math.PI) - el.yaw);
 		//public void knockBack(Entity, int, double, double)
 		el.a(aEL, damage, d0, d1);
 	}
@@ -203,10 +206,9 @@ public abstract class Skill extends BasicCommand {
 			EntityLiving el = ((CraftLivingEntity) target).getHandle();
 			el.lastDamage = edbe.getDamage();
 			//hurtTicks (maxHurtTime) = attackedAtYaw (aV -> aW) = 10
-			//Change from aV to aW in 1.4.6
-			el.hurtTicks = el.aV = 10;
-			//el.deathTime flag. Change from aW to aX in 1.4.6
-			el.aW = 0.0F;
+			el.hurtTicks = el.aW = 10;
+			//el.deathTime flag. 
+			el.aX = 0.0F;
 			if (knockback)
 				knockBack(target, attacker, edbe.getDamage());
 			//TODO Look into this later.
@@ -324,6 +326,22 @@ public abstract class Skill extends BasicCommand {
 	}
 	
 	/**
+	 * Get the firework effect.
+	 * @return
+	 */
+	public FireworkEffect getFireworkEffect() {
+		return this.fireworkEffect;
+	}
+	
+	/**
+	 * Set the firework effect.
+	 * @param fe
+	 */
+	public void setFireworkEffect(FireworkEffect fe) {
+		this.fireworkEffect = fe;
+	}
+	
+	/**
 	 * Defines comparison for Skills.
 	 */
 	public boolean equals(Object obj) {
@@ -362,7 +380,7 @@ public abstract class Skill extends BasicCommand {
 		return (Math.abs(loc1.getBlockX() - loc2.getBlockX()) < 25) && 
 				(Math.abs(loc1.getBlockY() - loc2.getBlockY()) < 25) && 
 				(Math.abs(loc1.getBlockZ() - loc2.getBlockZ()) < 25);	
-		}
+	}
 
 	@SuppressWarnings("incomplete-switch")
 	/**

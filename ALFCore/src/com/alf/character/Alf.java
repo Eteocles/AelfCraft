@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -64,6 +65,8 @@ public class Alf extends CharacterTemplate {
 	private Set<Monster> summons = new HashSet<Monster>();
 	//Pet
 	private Pet pet;
+	//
+	private EntityType queuePet;
 	//Binds
 	private Map<Material, String[]> binds = new ConcurrentHashMap<Material, String[]>();
 	//Suppressed Skills (Can't be used)
@@ -128,7 +131,24 @@ public class Alf extends CharacterTemplate {
 	public void addSkill(String skill, ConfigurationSection section) {
 		this.skills.put(skill.toLowerCase(), section);
 	}
+	
+	/**
+	 * Queue the type of pet on death for respawning.
+	 */
+	public void queuePetOnDeath() {
+		this.queuePet = this.pet.getEntity().getType();
+	}
 
+	/**
+	 * Return the type of queued pet, if any.
+	 * @return
+	 */
+	public EntityType popPetOnRespawn() {
+		EntityType petType = this.queuePet;
+		this.queuePet = null;
+		return petType;
+	}
+	
 	/**
 	 * Whether this Alf has an experience type.
 	 * @param type

@@ -216,7 +216,7 @@ public class ChPlayer {
 	 * @param name
 	 * @return
 	 */
-	public List<Mail> readMail(String name) {
+	public List<Mail> readUnreadMail(String name) {
 		List<Mail> pendingMail = this.unreadMail.remove(name);
 		this.readMail.put(name, pendingMail);
 		
@@ -238,7 +238,7 @@ public class ChPlayer {
 	 * Called from the Player Storage.
 	 * @return
 	 */
-	public Map<String, List<Mail>> saveUnreadMail() {
+	public Map<String, List<Mail>> getUnreadMail() {
 		return this.unreadMail;
 	}
 	
@@ -247,7 +247,7 @@ public class ChPlayer {
 	 * Called from the Player Storage.
 	 * @return
 	 */
-	public Map<String, List<Mail>> saveReadMail() {
+	public Map<String, List<Mail>> getReadMail() {
 		return this.readMail;
 	}
 	

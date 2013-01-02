@@ -35,7 +35,7 @@ public class NormalChannel extends ChatChannel {
 		for (ChPlayer player : getPlayers()) {
 			Player p = player.getPlayer();
 			Messaging.send(p, "[$1]$2 $3: " + message, 
-					new Object[] {getIden(), ChatColor.WHITE, sender.getPlayer().getDisplayName()}, getColorPrefix());
+					new Object[] {getIden(), ChatColor.GRAY, sender.getPlayer().getDisplayName()}, getColorPrefix());
 		}
 	}
 	

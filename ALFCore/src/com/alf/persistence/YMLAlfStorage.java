@@ -11,8 +11,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import net.minecraft.server.v1_4_5.EntityLiving;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,18 +18,14 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftLivingEntity;
-import org.bukkit.entity.Ageable;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
 import com.alf.character.Alf;
 import com.alf.character.Pet;
 import com.alf.character.classes.AlfClass;
-import com.alf.character.effect.common.FollowEffect;
+import com.alf.util.Util;
 
 /**
  * Stores Alf data in YML.
@@ -109,22 +103,8 @@ public class YMLAlfStorage extends AlfStorage {
 			
 			EntityType petType = EntityType.fromName(playerConfig.getString("pet", null));
 			if (petType != null) {
-				LivingEntity petEntity = (LivingEntity)player.getWorld().spawnEntity(safeLoc, petType);
-				if (petEntity instanceof Ageable)
-					((Ageable)petEntity).setBaby();
-				
-				if (petEntity instanceof Creature)
-					((Creature)petEntity).setTarget(player);
-				
-				EntityLiving eL = ((CraftLivingEntity)petEntity).getHandle();
-				//Clear the PathEntity (PathEntity pe = null)
-				eL.getNavigation().g();
-				
-				Pet pet = new Pet(this.plugin, petEntity, player.getName() + "'s Pet", playerAlf);
-				playerAlf.setPet(pet);
-				plugin.getCharacterManager().addPet(pet);
-				
-				playerAlf.addEffect(new FollowEffect(null, 250L));
+				Pet pet = Util.spawnPet(plugin, playerAlf, petType, safeLoc);
+				AlfCore.log(Level.INFO, "Loaded pet: " + pet.getName() + " with EID : " +pet.getEntity().getUniqueId());
 			}
 
 			AlfCore.log(Level.INFO, "Loaded alf: " + player.getName() + " with EID: " + player.getEntityId());

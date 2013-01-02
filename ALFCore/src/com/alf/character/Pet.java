@@ -14,6 +14,8 @@ import com.alf.AlfCore;
 public class Pet extends Monster {
 
 	private Alf owner;
+	//Moving, Stationary, ??
+	private int actionId;
 	
 	/**
 	 * Construct the pet.
@@ -27,6 +29,7 @@ public class Pet extends Monster {
 		this.owner = owner;
 		setMaxHealth(plugin.getCharacterManager().getMaxHealth(lEntity));
 		lEntity.setHealth(lEntity.getMaxHealth());
+		actionId = 0;
 	}
 	
 	/**
@@ -47,6 +50,26 @@ public class Pet extends Monster {
 	
 	public void setOwner(Alf alf) {
 		this.owner = alf;
+	}
+
+	/**
+	 * Get the action identifier for this pet.
+	 * @return - the determinant for behavior
+	 */
+	public int getAction() {
+		return this.actionId;
+	}
+	
+	public void toggleStationary() {
+		this.actionId = (this.actionId == 0) ? 1 : 0;
+	}
+	
+	/**
+	 * Set how this pet will behave.
+	 * @param type
+	 */
+	public void setAction(int type) {
+		this.actionId = type;
 	}
 	
 }

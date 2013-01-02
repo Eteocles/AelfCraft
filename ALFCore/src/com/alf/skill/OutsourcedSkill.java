@@ -32,7 +32,7 @@ public class OutsourcedSkill extends Skill {
 	 * @param name
 	 */
 	public OutsourcedSkill(AlfCore plugin, String name) {
-		super(plugin, name);
+		super(plugin, name, null);
 		Bukkit.getServer().getPluginManager().registerEvents(new SkillAlfListener(), plugin);
 	}
 	

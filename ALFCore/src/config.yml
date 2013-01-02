@@ -30,8 +30,6 @@ classes:
     reset-master-on-change: false
     reset-prof-master-on-change: false
     reset-prof-on-pri-change: false
-    lock-till-master: false
-    lock-at-max-level: false
 properties:
     storage-type: yml
     economy: true

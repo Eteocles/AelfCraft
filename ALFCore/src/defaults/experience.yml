@@ -82,7 +82,6 @@ logging:
     log: 3
     cactus: 1
     sapling: .1
-crafting:
 smelting: .75
 engineering: .5
 enchanting: .5

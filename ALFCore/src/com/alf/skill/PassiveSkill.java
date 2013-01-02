@@ -29,7 +29,7 @@ public abstract class PassiveSkill extends Skill {
 	 * @param name
 	 */
 	public PassiveSkill(AlfCore plugin, String name) {
-		super(plugin, name);
+		super(plugin, name, null);
 		setUsage("Passive Skill");
 		Bukkit.getServer().getPluginManager().registerEvents(new SkillListener(), plugin);
 	}

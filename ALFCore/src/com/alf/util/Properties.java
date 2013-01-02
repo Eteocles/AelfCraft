@@ -88,10 +88,6 @@ public class Properties {
 	public boolean resetProfMasteryOnClassChange = false;
 	/** Reset profession experience on primary change. */
 	public boolean resetProfOnPrimaryChange = false;
-	/** Lock class swaps until mastery. */
-	public boolean lockPathTillMaster = false;
-	/** Lock class swaps when mastery is attained. */
-	public boolean lockAtHighestTier = false;
 	/** Debug mode. */
 	public boolean debug;
 	/** Type of storage to use. */
@@ -345,8 +341,6 @@ public class Properties {
 			this.resetMasteryOnClassChange = section.getBoolean("reset-master-on-change", false);
 			this.resetProfMasteryOnClassChange = section.getBoolean("reset-prof-master-on-change", false);
 			this.resetProfOnPrimaryChange = section.getBoolean("reset-prof-on-pri-change", false);
-			this.lockPathTillMaster = section.getBoolean("lock-till-master", false);
-			this.lockAtHighestTier = section.getBoolean("lock-at-max-level", false);
 			this.swapMasterFree = section.getBoolean("master-swap-free", true);
 			this.firstSwitchFree = section.getBoolean("first-swap-free", true);
 			this.swapCost = Util.toDoubleNonNull(section.get("swap-cost", 0), "swap-cost");

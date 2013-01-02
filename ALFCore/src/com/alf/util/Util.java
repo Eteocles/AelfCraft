@@ -9,16 +9,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.minecraft.server.v1_4_6.EntityLiving;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftLivingEntity;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import com.alf.AlfCore;
 import com.alf.character.Alf;
+import com.alf.character.Pet;
+import com.alf.character.effect.common.PetFollowEffect;
 
 /**
  * Handles utility methods.
@@ -36,7 +46,7 @@ public class Util {
 	public static final List<String> weapons;
 	public static final List<String> armors;
 	public static final List<String> tools;
-	
+
 	public static final HashMap<String, Location> deaths = new LinkedHashMap<String, Location>() {
 		private static final long serialVersionUID = -5160276589164566330L;
 		private static final int MAX_ENTRIES = 50;
@@ -44,6 +54,39 @@ public class Util {
 			return size() > MAX_ENTRIES;
 		}
 	};
+
+	public static Pet spawnPet(AlfCore plugin, Alf alf, EntityType petType, Location location) {
+		World w = location.getWorld();
+
+		//		AlfCore.log(Level.INFO, "Creating pet of type  " + petType.getName() + " in world " + w + " at location [" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + "]");
+		LivingEntity petEntity = (LivingEntity) w.spawnEntity(location, petType);
+
+		Player player = alf.getPlayer();
+
+		if (petEntity instanceof Ageable) { 
+			((Ageable)petEntity).setBaby();
+			((Ageable)petEntity).setAgeLock(true);
+		}
+
+		if (petEntity instanceof Creature)
+			((Creature)petEntity).setTarget(player);
+
+		if (petEntity instanceof Slime)
+			((Slime)petEntity).setSize(1);
+
+		EntityLiving eL = ((CraftLivingEntity)petEntity).getHandle();
+		//Clear the PathEntity (PathEntity pe = null)
+		eL.getNavigation().g();
+
+		Pet pet = new Pet(plugin, petEntity, player.getName() + "'s Pet", alf);
+		alf.setPet(pet);
+
+		plugin.getCharacterManager().addPet(pet);
+
+		alf.addEffect(new PetFollowEffect(null, 250L));
+
+		return pet;
+	}
 
 	/**
 	 * Move an item in an Alf's inventory from a slot.
@@ -122,7 +165,7 @@ public class Util {
 		//TODO Fix
 		return level*7;
 	}
-	
+
 	/**
 	 * Get the feather fall level of an inventory.
 	 * @param inv
@@ -130,11 +173,11 @@ public class Util {
 	 */
 	public static int getFeatherFallLevel(PlayerInventory inv) {
 		int level = 0;
-		
+
 		for (ItemStack armor : inv.getArmorContents())
 			if (armor != null && armor.containsEnchantment(Enchantment.PROTECTION_FALL))
 				level += armor.getEnchantmentLevel(Enchantment.PROTECTION_FALL);
-		
+
 		return level;
 	}
 
@@ -331,7 +374,7 @@ public class Util {
 			throw new IllegalArgumentException(name + " must be a numeral!");
 		return newVal;
 	}
-	
+
 	/**
 	 * Format the double by fixing its precision.
 	 * @param d
@@ -340,6 +383,23 @@ public class Util {
 	public static double formatDouble(double d) {
 		int val = (int) (d * 1000.0D);
 		return val / 1000.0D;
+	}
+
+	/**
+	 * 
+	 * @param yaw
+	 * @param pitch - rotation about the x axis (-90 is straight up, 90 is straight down // inverted)
+	 * @param magnitude
+	 * @return
+	 */
+	public static double[] toCartesian(double yaw, double pitch, int magnitude) {
+//		double pitchr= Math.toRadians(pitch);
+		double yawr = Math.toRadians(yaw);
+		double x = magnitude*- Math.sin(yawr);
+		//Invert the sin value for pitch because sin is an odd function.
+		double y = -magnitude*Math.sin(pitch);
+		double z = magnitude*Math.cos(yawr);
+		return new double[] {x, y, z};
 	}
 
 	static {
@@ -436,6 +496,7 @@ public class Util {
 		transparentBlocks.add(Material.DETECTOR_RAIL);
 		transparentBlocks.add(Material.DIODE_BLOCK_OFF);
 		transparentBlocks.add(Material.DIODE_BLOCK_ON);
+		transparentBlocks.add(Material.LONG_GRASS);
 
 		transparentIds = new HashSet<Byte>(22);
 
@@ -460,6 +521,7 @@ public class Util {
 		transparentIds.add((byte)Material.DETECTOR_RAIL.getId());
 		transparentIds.add((byte)Material.DIODE_BLOCK_OFF.getId());
 		transparentIds.add((byte)Material.DIODE_BLOCK_ON.getId());
+		transparentIds.add((byte)Material.LONG_GRASS.getId());
 	}
 
 }

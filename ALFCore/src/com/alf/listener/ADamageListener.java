@@ -1,13 +1,14 @@
 package com.alf.listener;
 
-import net.minecraft.server.v1_4_5.EntityLiving;
-import net.minecraft.server.v1_4_5.MobEffectList;
+import net.minecraft.server.v1_4_6.EntityLiving;
+import net.minecraft.server.v1_4_6.MobEffectList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftLivingEntity;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -20,6 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -198,6 +200,15 @@ public class ADamageListener implements Listener {
 		});
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onExplosionPrime(ExplosionPrimeEvent event) {
+		Entity entity = event.getEntity();
+		if (entity instanceof Creeper) {
+			if (plugin.getCharacterManager().getPet((LivingEntity)entity) != null)
+				event.setCancelled(true);
+		}
+	}
+	
 	/**
 	 * Handle entity damage events.
 	 * @param event
@@ -213,11 +224,12 @@ public class ADamageListener implements Listener {
 		//If the atttacker was an entity, get the attacking entity.
 		if (event instanceof EntityDamageByEntityEvent) {
 			attacker = ((EntityDamageByEntityEvent)event).getDamager();
-			if (this.plugin.getCharacterManager().getPet((LivingEntity)attacker) != null) {
-				event.setDamage(0);
-				event.setCancelled(true);
-				return;
-			}
+			if (attacker instanceof LivingEntity)
+				if (this.plugin.getCharacterManager().getPet((LivingEntity)attacker) != null) {
+					event.setDamage(0);
+					event.setCancelled(true);
+					return;
+				}
 		}
 		
 		//Cancel handling if defender is dead or in creative mode.

@@ -35,7 +35,7 @@ public abstract class ActiveSkill extends Skill {
 	 * @param name
 	 */
 	public ActiveSkill(AlfCore plugin, String name) {
-		super(plugin, name);
+		super(plugin, name, null);
 	}
 	
 	/**

@@ -123,14 +123,14 @@ public class YMLChPlayerStorage extends ChPlayerStorage {
 		ConfigurationSection section = config.getConfigurationSection("unread-mail");
 		if (section == null)
 			section = config.createSection("unread-mail");
-		Map<String, List<Mail>> mail = player.saveUnreadMail();
+		Map<String, List<Mail>> mail = player.getUnreadMail();
 		for (String s : mail.keySet())
 			section.set(s, getMailSave(mail.get(s)));
 		
 		section = config.getConfigurationSection("read-mail");
 		if (section == null)
 			section = config.createSection("read-mail");
-		mail = player.saveReadMail();
+		mail = player.getReadMail();
 		for (String s : mail.keySet())
 			section.set(s, getMailSave(mail.get(s)));
 	}

@@ -66,6 +66,7 @@ public class AEntityListener implements Listener {
 			//Push death event and inventory into the DeathManager.
 			this.plugin.getDeathManager().queuePlayer(event);
 			event.getDrops().clear();
+			
 		}
 
 		if (attacker != null) {
@@ -77,6 +78,13 @@ public class AEntityListener implements Listener {
 		if (defender instanceof Player) {
 			Player player = (Player) defender;
 			alfDefender = (Alf) character;
+			
+			if (alfDefender.getPet() != null) {
+				alfDefender.queuePetOnDeath();
+				plugin.getCharacterManager().removePet(alfDefender.getPet());
+				alfDefender.removeEffect(alfDefender.getEffect("Follow"));
+				alfDefender.setPet(null);
+			}
 			//Add to list of deaths.
 			Util.deaths.put(player.getName(), event.getEntity().getLocation());
 			alfDefender.cancelDelayedSkill();
@@ -299,18 +307,27 @@ public class AEntityListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
 		CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
-		if (reason == CreatureSpawnEvent.SpawnReason.SPAWNER) {
+		switch (reason) {
+		case BREEDING:
+			break;
+		case BUILD_IRONGOLEM:
+			break;
+		case BUILD_SNOWMAN:
+			break;
+		case BUILD_WITHER:
+			break;
+		case SPAWNER:
 			Monster monster = new Monster(this.plugin, event.getEntity());
 			monster.setSpawnReason(event.getSpawnReason());
 			this.plugin.getCharacterManager().addMonster(monster);
-		} 
-		else if (reason == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG) {
-			
+			break;
+		case SPAWNER_EGG:
+			break;
+		case CUSTOM:
+			break;
+		default:
+			event.setCancelled(true);
 		}
-		else if (reason == CreatureSpawnEvent.SpawnReason.CUSTOM) {
-			
-		}
-		else event.setCancelled(true);
 	}
 
 	/**
@@ -335,5 +352,5 @@ public class AEntityListener implements Listener {
 			return 1.0D + (Math.abs(diff) - AlfCore.properties.pvpExpRange) / AlfCore.properties.pvpMaxExpRange;
 		return 1.0D;
 	}
-
+	
 }

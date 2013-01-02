@@ -21,6 +21,7 @@ import com.alf.command.CommandParser;
 import com.alf.command.commands.AdminHealCommand;
 import com.alf.command.commands.AdminHealthCommand;
 import com.alf.command.commands.BindSkillCommand;
+import com.alf.command.commands.ChooseCommand;
 import com.alf.command.commands.ConfigReloadCommand;
 import com.alf.command.commands.HelpCommand;
 import com.alf.command.commands.ManaCommand;
@@ -33,6 +34,7 @@ import com.alf.command.commands.PartyLeaveCommand;
 import com.alf.command.commands.PartyModeCommand;
 import com.alf.command.commands.PartyWhoCommand;
 import com.alf.command.commands.PetKillCommand;
+import com.alf.command.commands.PetSummonCommand;
 import com.alf.command.commands.ShushCommand;
 import com.alf.listener.ADamageListener;
 import com.alf.listener.AEntityListener;
@@ -282,6 +284,8 @@ public class AlfCore extends AlfPlugin {
 		cp.addCommand(new PartyModeCommand(this));
 		cp.addCommand(new PartyWhoCommand(this));
 		cp.addCommand(new PetKillCommand(this));
+		cp.addCommand(new PetSummonCommand(this));
+		cp.addCommand(new ChooseCommand(this));
 	}
 
 	protected void registerEvents() {
