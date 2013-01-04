@@ -7,7 +7,7 @@ leveling:
     pvp-exp-loss: 1.0
     max-party-size: 6
     party-exp-bonus: 1.0
-    level-loss: true
+    level-loss: false
     mastery-loss: false
     spawner-checks: true
     spawner-exp-mult: .3

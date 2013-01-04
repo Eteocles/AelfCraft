@@ -30,6 +30,7 @@ public class CharacterDamageManager {
 	private Map<EntityType, Integer> creatureDamage;
 	private Map<EntityDamageEvent.DamageCause, Double> environmentalDamage;
 	private Map<Integer, SkillUseInfo> spellTargs = new HashMap<Integer, SkillUseInfo>();
+	private Map<String, Double> damageBuffs = new HashMap<String, Double>();
 	
 	/**
 	 * Constructs the damage manager.
@@ -169,7 +170,7 @@ public class CharacterDamageManager {
 				if (secondDamage != null)
 					secondDamage += (int)(secondClass.getProjDamageLevel(type) * alf.getLevel(secondClass));
 			}
-			
+
 			if (classDamage != null && secondDamage != null)
 				return (classDamage > secondDamage) ? classDamage : secondDamage;
 			
@@ -213,6 +214,7 @@ public class CharacterDamageManager {
 			if (secondDamage != null)
 				return secondDamage;
 		}
+		
 		return (Integer) this.itemDamage.get(item);
 	}
 	
@@ -299,6 +301,35 @@ public class CharacterDamageManager {
 	public void addSpellTarget(Entity o, CharacterTemplate character, Skill skill) {
 		SkillUseInfo skillInfo = new SkillUseInfo(character, skill);
 		this.spellTargs.put(o.getEntityId(), skillInfo);
+	}
+	
+	/**
+	 * Add an alf damage buff.
+	 * @param player
+	 * @param buff
+	 */
+	public void addAlfDamageBuff(Player player, double buff) {
+		Double damageBuff = this.damageBuffs.get(player.getName());
+		if (damageBuff == null || damageBuff < buff)
+			this.damageBuffs.put(player.getName(), buff);
+	}
+	
+	/**
+	 * Get the Alf's damage buff.
+	 * @param player
+	 * @return
+	 */
+	public double getAlfDamageBuff(Player player) {
+		Double damageBuff = this.damageBuffs.get(player.getName());
+		return (damageBuff == null) ? 0.0D : damageBuff;
+	}
+	
+	/**
+	 * Remove a player's damage buff.
+	 * @param player
+	 */
+	public void removeAlfDamageBuff(Player player) {
+		this.damageBuffs.remove(player.getName());
 	}
 	
 	/**

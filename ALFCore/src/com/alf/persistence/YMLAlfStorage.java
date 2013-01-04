@@ -25,6 +25,7 @@ import com.alf.AlfCore;
 import com.alf.character.Alf;
 import com.alf.character.Pet;
 import com.alf.character.classes.AlfClass;
+import com.alf.util.Properties;
 import com.alf.util.Util;
 
 /**
@@ -67,7 +68,9 @@ public class YMLAlfStorage extends AlfStorage {
 
 		if (playerFile.exists()) {
 			Configuration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
+			
 			AlfClass playerClass = loadClass(player, playerConfig);
+			
 			if (playerClass == null) {
 				AlfCore.log(Level.INFO, "Invalid class found for " + player.getName() + ". Resetting player.");
 				return createNewAlf(player);
@@ -160,10 +163,27 @@ public class YMLAlfStorage extends AlfStorage {
 				}
 	}
 
+	/**
+	 * Load player experience.
+	 * @param playerAlf
+	 * @param section
+	 */
 	private void loadExperience(Alf playerAlf,
-			ConfigurationSection configurationSection) {
-		// TODO Auto-generated method stub
-
+			ConfigurationSection section) {
+		if (playerAlf == null || playerAlf.getAlfClass() == null || section == null)
+			return;
+		Set<String> expList = section.getKeys(false);
+		
+		if (expList != null)
+			for (String className : expList) {
+				double exp = section.getDouble(className, 0.0D);
+				AlfClass alfClass = this.plugin.getClassManager().getClass(className);
+				if (alfClass != null && playerAlf.getExperience(alfClass) == 0) {
+					if (exp > Properties.maxExp)
+						exp = Properties.maxExp;
+					playerAlf.setExperience(alfClass, exp);
+				}
+			}
 	}
 
 	/**
@@ -196,15 +216,20 @@ public class YMLAlfStorage extends AlfStorage {
 	 * @return
 	 */
 	public AlfClass loadClass(Player player, Configuration config) {
+//		AlfCore.log(Level.INFO, "Checking for a class...");
 		AlfClass playerClass = null;
 		AlfClass defaultClass = this.plugin.getClassManager().getDefaultClass();
 
 		if (config.getString("class") != null) {
+//			AlfCore.log(Level.INFO, "Found class: " + config.getString("class"));
+			
 			playerClass = this.plugin.getClassManager().getClass(config.getString("class"));
 			if (playerClass == null)
 				playerClass = defaultClass;
 			else if (! playerClass.isPrimary())
 				playerClass = defaultClass;
+			
+//			AlfCore.log(Level.INFO, "Got class: " + playerClass.toString());
 		}
 		else
 			playerClass = defaultClass;
@@ -295,8 +320,18 @@ public class YMLAlfStorage extends AlfStorage {
 		}
 	}
 
+	/**
+	 * Save the experience.
+	 * @param alf
+	 * @param config
+	 */
 	private void saveExperience(Alf alf, ConfigurationSection config) {
-
+		if (alf == null || alf.getClass() == null || config == null)
+			return;
+		
+		Map<String, Double> expMap = alf.getExperienceMap();
+		for (Map.Entry<String, Double> entry : expMap.entrySet())
+			config.set((String) entry.getKey(), entry.getValue());
 	}
 	
 	/**

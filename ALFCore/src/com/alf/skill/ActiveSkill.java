@@ -183,10 +183,12 @@ public abstract class ActiveSkill extends Skill {
 		
 		//If player has too low of a level to use the Skill, deny the usage.
 		int level = SkillConfigManager.getUseSetting(alf, this, Setting.LEVEL, 1, true);
-		if (alf.getSkillLevel(this) < level)
+		if (alf.getSkillLevel(this) < level) {
 			messageAndEvent(alf, new SkillResult(
 					SkillResult.ResultType.LOW_LEVEL, true, new Object[] {level}
 			));
+			return true;
+		}
 		
 		//If the global value for cooldown has not passed, deny the usage.
 		long time = System.currentTimeMillis();

@@ -63,6 +63,7 @@ public class ConfigManager {
 		if (! classConfigFolder.exists()) {
 			classConfigFolder.mkdirs();
 			checkForConfig(new File(classConfigFolder, "citizen.yml"));
+			checkForConfig(new File(classConfigFolder, "warrior.yml"));
 			//TODO Add other class files.
 		}
 		//Check for Skill config files.

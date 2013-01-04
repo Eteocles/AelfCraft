@@ -37,9 +37,9 @@ announcer:
   identifier: b
   type: 3
   announcements:
-    - This is a test broadcast!
-    - I love strawberry shortcake!
-    - Medic!
+    - Broadcast 1
+    - Broadcast 2
+    - Broadcast 3
   frequency: 1000
 default: general
 guest: guests

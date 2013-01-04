@@ -8,6 +8,7 @@ public enum EffectType {
 	BENEFICIAL,
 	BLEED,
 	BLIND,
+	PHYS_BUFF,
 	DISABLE,
 	DISARM,
 	DISPELLABLE,

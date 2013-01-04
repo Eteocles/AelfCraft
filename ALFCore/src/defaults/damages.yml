@@ -1,55 +1,55 @@
-creature-health: #player default health 20
-    Chicken: 4
-    Cow: 10
-    Creeper: 30
-    Ghast: 15
-    Giant: 150
-    Pig: 10
-    PigZombie: 30
-    Sheep: 8
-    Skeleton: 30
-    Ozelot: 10
-    Slime: 25
-    Spider: 30
-    Squid: 10
-    Zombie: 30
-    Wolf: 8
-    CaveSpider: 40
-    Enderman: 50
-    EnderDragon: 500
-    Silverfish: 8
-    Villager: 20
-    Blaze: 30
-    MushroomCow: 20
-    LavaSlime: 16
-    SnowMan: 4
-    VillagerGolem: 125
-    Bat: 8
-    Witch: 30
-    WitherBoss: 350
-    WitherSkull: 50 #this may not work
+creature-health: #player default health 400
+    Chicken: 25
+    Cow: 70
+    Creeper: 200
+    Ghast: 150
+    Giant: 1500
+    Pig: 60
+    PigZombie: 200
+    Sheep: 50
+    Skeleton: 200
+    Ozelot: 60
+    Slime: 100 #Know that Slime health is decreased incrementally.
+    Spider: 200
+    Squid: 50
+    Zombie: 225
+    Wolf: 60
+    CaveSpider: 180
+    Enderman: 200
+    EnderDragon: 10000
+    Silverfish: 40
+    Villager: 80
+    Blaze: 200
+    MushroomCow: 80
+    LavaSlime: 85
+    SnowMan: 30
+    VillagerGolem: 800
+    Bat: 50
+    Witch: 150
+    WitherBoss: 9001
+    WitherSkull: 250 
 creature-damage:
-    Creeper: 50
-    Giant: 19
-    Zombie: 4
-    PigZombie: 6
-    EnderDragon: 20
-    Wolf: 2
-    Enderman: 7
-    Skeleton: 4
-    Spider: 2
-    CaveSpider: 3
+    Creeper: 500
+    Giant: 380
+    Zombie: 80
+    PigZombie: 120
+    EnderDragon: 400
+    Wolf: 40
+    Enderman: 350
+    Skeleton: 65
+    Spider: 100
+    CaveSpider: 50
     SnowMan: 0
-    VillagerGolem: 20
-    Ozelot: 3
-    Slime: 4
-    LavaSlime: 6
-    Blaze: 4
-    WitherBoss: 15
+    VillagerGolem: 200
+    Ozelot: 70
+    Slime: 250
+    LavaSlime: 200
+    Blaze: 200
+    WitherBoss: 350
 item-damage:
-    Air: 2
+    Air: 13
 environmental-damage:
-    FALL: .02 #per block above 3
+    FALL: .1 #per block above 3
     LAVA: .2
     FIRE: .2
     FIRE_TICK: 1

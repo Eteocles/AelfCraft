@@ -134,7 +134,7 @@ public class APlayerListener implements Listener {
 		Player player = event.getPlayer();
 		final Alf alf = this.plugin.getCharacterManager().getAlf(player);
 		alf.setHealth(alf.getMaxHealth());
-		alf.setMana(0);
+		alf.setMana(alf.getMaxMana() / 2);
 
 		EntityType petType = alf.popPetOnRespawn();
 		if (petType != null) {

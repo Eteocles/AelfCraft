@@ -20,11 +20,14 @@ import com.alf.command.CommandHandler;
 import com.alf.command.CommandParser;
 import com.alf.command.commands.AdminHealCommand;
 import com.alf.command.commands.AdminHealthCommand;
+import com.alf.command.commands.AdminEnergyCommand;
+import com.alf.command.commands.AdminLevelCommand;
+import com.alf.command.commands.BarToggleCommand;
 import com.alf.command.commands.BindSkillCommand;
 import com.alf.command.commands.ChooseCommand;
 import com.alf.command.commands.ConfigReloadCommand;
 import com.alf.command.commands.HelpCommand;
-import com.alf.command.commands.ManaCommand;
+import com.alf.command.commands.EnergyCommand;
 import com.alf.command.commands.PartyAcceptCommand;
 import com.alf.command.commands.PartyChatCommand;
 import com.alf.command.commands.PartyInviteCommand;
@@ -34,6 +37,7 @@ import com.alf.command.commands.PartyLeaveCommand;
 import com.alf.command.commands.PartyModeCommand;
 import com.alf.command.commands.PartyWhoCommand;
 import com.alf.command.commands.PetKillCommand;
+import com.alf.command.commands.PetSitCommand;
 import com.alf.command.commands.PetSummonCommand;
 import com.alf.command.commands.ShushCommand;
 import com.alf.listener.ADamageListener;
@@ -274,7 +278,7 @@ public class AlfCore extends AlfPlugin {
 		cp.addCommand(new AdminHealthCommand(this));
 		cp.addCommand(new BindSkillCommand(this));
 		cp.addCommand(new ConfigReloadCommand(this));
-		cp.addCommand(new ManaCommand(this));
+		cp.addCommand(new EnergyCommand(this));
 		cp.addCommand(new PartyAcceptCommand(this));
 		cp.addCommand(new PartyChatCommand(this));
 		cp.addCommand(new PartyInviteCommand(this));
@@ -286,6 +290,10 @@ public class AlfCore extends AlfPlugin {
 		cp.addCommand(new PetKillCommand(this));
 		cp.addCommand(new PetSummonCommand(this));
 		cp.addCommand(new ChooseCommand(this));
+		cp.addCommand(new BarToggleCommand(this));
+		cp.addCommand(new AdminEnergyCommand(this));
+		cp.addCommand(new PetSitCommand(this));
+		cp.addCommand(new AdminLevelCommand(this));
 	}
 
 	protected void registerEvents() {

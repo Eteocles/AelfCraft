@@ -57,29 +57,31 @@ public class BindSkillCommand extends BasicCommand {
 			if (skill == null)
 				skill = this.plugin.getSkillManager().getSkillFromIdent("skill " + args[0], sender);
 			
-			if (skill != null && alf.canUseSkill(skill.getName())) {
-				if (skill instanceof PassiveSkill || skill instanceof OutsourcedSkill) {
-					Messaging.send(player, "You can not bind passive skills!", new Object[0], ChatColor.RED);
-					return false;
+			if (skill != null && alf.hasAccessToSkill(skill)) {
+				if (alf.canUseSkill(skill.getName())) {
+					if (skill instanceof PassiveSkill || skill instanceof OutsourcedSkill) {
+						Messaging.send(player, "You can not bind passive skills!", new Object[0], ChatColor.RED);
+						return false;
+					}
+					
+					if (skill.isType(SkillType.UNBINDABLE)) {
+						Messaging.send(player, "You can not bind that skill!", new Object[0], ChatColor.RED);
+						return false;
+					}
+					
+					if (mat == Material.AIR){
+						Messaging.send(sender, "You must be holding an item to bind a skill!", new Object[0], ChatColor.RED);
+						return false;
+					}
+					
+					args[0] = skill.getName();
+					
+					alf.bind(mat, args);
+					Messaging.send(sender,  "$1 has been bound to $2.", new Object[] { MaterialUtil.getFriendlyName(mat), skill.getName() });
+				} else {
+					Messaging.send(sender, "You are not high enough level to use that skill!", new Object[0]);
 				}
-				
-				if (skill.isType(SkillType.UNBINDABLE)) {
-					Messaging.send(player, "You can not bind that skill!", new Object[0], ChatColor.RED);
-					return false;
-				}
-				
-				if (mat == Material.AIR){
-					Messaging.send(sender, "You must be holding an item to bind a skill!", new Object[0], ChatColor.RED);
-					return false;
-				}
-				
-				args[0] = skill.getName();
-				
-				alf.bind(mat, args);
-				Messaging.send(sender,  "$1 has been bound to $2.", new Object[] { MaterialUtil.getFriendlyName(mat), skill.getName() });
-			} else {
-				Messaging.send(sender, "That skill does not exist for your class.", new Object[0]);
-			}
+			} else Messaging.send(sender, "That skill does not exist for your class.", new Object[0]);
 		} else {
 			alf.unbind(mat);
 			Messaging.send(sender, "$1 is no longer bound to a skill.", new Object[] { MaterialUtil.getFriendlyName(mat) });

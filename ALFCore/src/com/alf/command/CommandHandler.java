@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import com.alf.AlfCore;
 import com.alf.AlfPlugin;
+import com.alf.character.Alf;
 import com.alf.skill.Skill;
 import com.alf.util.Messaging;
 
@@ -21,7 +22,7 @@ public class CommandHandler implements CommandParser {
 	protected LinkedHashMap<String, Command> commands;
 	protected HashMap<String, Command> identifiers;
 	private AlfPlugin plugin;
-	
+
 	/**
 	 * Construct the Command Handler. 
 	 * @param alfPlugin
@@ -41,7 +42,7 @@ public class CommandHandler implements CommandParser {
 		for (String ident : command.getIdentifiers())
 			this.identifiers.put(ident.toLowerCase(), command);
 	}
-	
+
 	/**
 	 * Display the command help for the given command.
 	 * @param cmd - command in question
@@ -57,7 +58,7 @@ public class CommandHandler implements CommandParser {
 			for (String note : cmd.getNotes())
 				sender.sendMessage("§e"+note);
 	}
-	
+
 	/**
 	 * Get a command for a given identifier.
 	 * @param ident
@@ -68,7 +69,7 @@ public class CommandHandler implements CommandParser {
 		Skill skill = ((AlfCore)this.plugin).getSkillManager().getSkillFromIdent(ident, executor);
 		if (skill != null)
 			return skill;
-		
+
 		if (this.identifiers.get(ident.toLowerCase()) == null) {
 			for (Command cmd : this.commands.values()) {
 				if (cmd.isIdentifier(executor, ident))
@@ -77,7 +78,7 @@ public class CommandHandler implements CommandParser {
 		}
 		return (Command)this.identifiers.get(ident.toLowerCase());
 	}
-	
+
 	/**
 	 * Get the command from its name.
 	 * @param name
@@ -86,14 +87,14 @@ public class CommandHandler implements CommandParser {
 	public Command getCommand(String name) {
 		return (Command)this.commands.get(name.toLowerCase());
 	}
-	
+
 	/**
 	 * Get a list of all the commands.
 	 */
 	public List<Command> getCommands() {
 		return new ArrayList<Command>(this.commands.values());
 	}
-	
+
 	/**
 	 * Remove a command from the stored commands.
 	 * @param command - command to be removed
@@ -103,7 +104,7 @@ public class CommandHandler implements CommandParser {
 		for (String ident : command.getIdentifiers())
 			this.identifiers.remove(ident.toLowerCase());
 	}
-	
+
 	/**
 	 * Check whether a command sender has a permission.
 	 * A CommandSender from the console or an invalid permission will default to permission granted.
@@ -117,7 +118,7 @@ public class CommandHandler implements CommandParser {
 		Player player = (Player) sender;
 		return (player.isOp() || player.hasPermission(permission));
 	}
-	
+
 	/**
 	 * Handle the execution of a command.
 	 * @param sender - Command's sender
@@ -157,11 +158,31 @@ public class CommandHandler implements CommandParser {
 				return true;
 			}
 		}
-		
+
 		if (label.equalsIgnoreCase("skill")) {
-			Messaging.send(sender, "That skill does not exist!", new Object[0]);
+			if (args.length == 0) {
+				//Display available skills.
+				Alf alf = ((AlfCore)this.plugin).getCharacterManager().getAlf((Player)sender);
+				Set<String> skills = alf.getSkills().keySet();
+				Set<String> primSkills = alf.getAlfClass().getSkillNames();
+				Set<String> secSkills = (alf.getSecondClass() == null) ? new HashSet<String>() : alf.getSecondClass().getSkillNames();
+				String skillString = "[";
+				for (String s : skills) 
+					skillString += s + ", ";
+				for (String s : primSkills)
+					skillString += s + ", ";
+				for (String s : secSkills)
+					skillString += s + ", ";
+				if (skillString.length() > 1) {
+					skillString = skillString.substring(0, skillString.length()-2) + "]";
+					Messaging.send(sender, "Your Skills: $1", new Object[] { skillString }, ChatColor.DARK_AQUA);
+				} else {
+					Messaging.send(sender, "You have no skills to use.", new Object[0]);
+				}
+			} else 
+				Messaging.send(sender, "That skill does not exist!", new Object[0]);
 		} else Messaging.send(sender, "Unrecognized command!", new Object[0], ChatColor.RED);
-		
+
 		return true;
 	}
 

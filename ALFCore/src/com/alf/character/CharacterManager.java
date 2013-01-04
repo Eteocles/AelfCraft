@@ -217,9 +217,9 @@ public class CharacterManager {
 		AlfClass playerClass = alf.getAlfClass();
 		AlfClass secondClass = alf.getSecondClass();
 		//If player doesn't have permissions...
-		if (! CommandHandler.hasPermission(p, "alfcore.classes."+playerClass.getName().toLowerCase()))
+		if (! CommandHandler.hasPermission(p, "alf.classes."+playerClass.getName().toLowerCase()))
 			alf.setAlfClass(this.plugin.getClassManager().getDefaultClass(), false);
-		if (secondClass != null && ! CommandHandler.hasPermission(p, "alfcore.classes."+secondClass.getName().toLowerCase()))
+		if (secondClass != null && ! CommandHandler.hasPermission(p, "alf.classes."+secondClass.getName().toLowerCase()))
 			alf.setAlfClass(null, true);
 	}
 
@@ -287,7 +287,7 @@ public class CharacterManager {
 	 */
 	public void saveAlf(Alf alf, boolean now) {
 		this.alfStorage.saveAlf(alf, now);
-		AlfCore.log(Level.INFO, "Saved alf: " + alf.getPlayer().getName());
+		AlfCore.log(Level.INFO, "Saved alf in core: " + alf.getPlayer().getName());
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package com.alf.listener;
 
+
+
 import net.minecraft.server.v1_4_6.EntityLiving;
 import net.minecraft.server.v1_4_6.MobEffectList;
 
@@ -533,6 +535,11 @@ public class ADamageListener implements Listener {
 			}
 			//
 			damage = getPlayerDamage(attackingPlayer, damage);
+			
+			if (alf.hasEffectType(EffectType.PHYS_BUFF)) {
+				double damageBuff = this.plugin.getDamageManager().getAlfDamageBuff(attackingPlayer);
+				damage += damageBuff * damage;
+			}
 		}
 		//Attacker is a Living Entity that's not a player.
 		else if (attacker instanceof LivingEntity) {

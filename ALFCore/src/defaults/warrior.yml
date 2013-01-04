@@ -1,0 +1,67 @@
+name: Warrior
+default: false
+wildcard-permission: true
+primary: true
+secondary: false
+description: The melee fighter with great might.
+permitted-armor:
+- LEATHER
+- IRON
+- CHAIN
+permitted-weapon:
+- WOOD
+- STONE
+- IRON_PICKAXE
+- IRON_SWORD
+- IRON_AXE
+- GOLD_AXE
+item-damage:
+    WOOD_AXE: 12
+    STONE_AXE: 18
+    IRON_PICKAXE: 14
+    IRON_AXE: 22
+    GOLD_AXE: 22
+    WOOD_SWORD: 18
+    STONE_SWORD: 23
+    IRON_SWORD: 27
+    GOLD_SWORD: 27
+permitted-skills:
+  Shout:
+        level: 1
+        cooldown: 3000
+  Tame:
+        level: 1
+  Roar:
+        level: 3
+        cooldown: 10000
+        mana: 15
+  Brawn:
+        level: 5
+        cooldown: 24000
+        mana: 10
+  Force:
+        level: 8
+        cooldown: 30000
+  StarBurst:
+        level: 15
+        cooldown: 30000
+        mana: 50
+experience-sources:
+- KILLING
+- PVP
+- QUESTING
+- EXTERNAL
+permission-skills:
+base-max-health: 500
+max-health-per-level: 0.5
+base-max-mana: 75
+max-mana-per-level: 1
+mana-regen: 1
+mana-regen-per-level: .05
+expmodifier: 1.0
+item-damage-level:
+projectile-damage:
+projectile-damage-level:
+expLoss: 0
+tier: 0
+recipes: [ default ]

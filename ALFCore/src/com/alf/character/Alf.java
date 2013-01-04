@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -84,6 +85,8 @@ public class Alf extends CharacterTemplate {
 	private PermissionAttachment transientPerms;
 	//Alf's delayed skill.
 	private DelayedSkill delayedSkill = null;
+	//Whether to show mana in the exp bar or not.
+	private boolean manaGUI = true;
 	//Combat effect.
 	private final CombatEffect combat;
 	//
@@ -207,6 +210,7 @@ public class Alf extends CharacterTemplate {
 	 * @param secondary - whether the class is a secondary type.
 	 */
 	public void changeAlfClass(AlfClass alfClass, boolean secondary) {
+		AlfCore.log(Level.INFO, "Changing Alf Class to: " + alfClass.toString());
 		//Clear all statuses.
 		clearEffects(); //Can this be abused?
 		clearSummons();
@@ -214,7 +218,7 @@ public class Alf extends CharacterTemplate {
 		setAlfClass(alfClass, secondary);
 		//If prefixes are enabled...
 		if (AlfCore.properties.prefixClassName)
-			this.player.setDisplayName("[" + getAlfClass().getName() + "]" + 
+			this.player.setDisplayName("[" + getAlfClass().getName() + "] " + 
 					this.player.getName());
 		this.plugin.getCharacterManager().performSkillChecks(this);
 		getTieredLevel(true);
@@ -422,6 +426,7 @@ public class Alf extends CharacterTemplate {
 										this.player.setSaturation(1.0F);
 										this.player.setExhaustion(0.0F);
 										syncHealth();
+										syncMana();
 									}
 									getTieredLevel(true);
 								} else Messaging.send(this.player, "You just lost a level! (Lvl $1 $2)", new Object[] {
@@ -1132,6 +1137,7 @@ public class Alf extends CharacterTemplate {
 		else if (mana < 0)
 			mana = 0;
 		this.mana.getAndSet(mana);
+		this.syncMana();
 	}
 
 	/**
@@ -1205,22 +1211,37 @@ public class Alf extends CharacterTemplate {
 			return secondClass;
 		return level != 0 ? alfClass : null;
 	}
+	
+	/**
+	 * Sync mana with experience output.
+	 */
+	public void syncMana() {
+		if (this.manaGUI) {
+			this.player.setLevel(0);
+			this.player.setExp(((float)this.mana.get() / (float)this.getMaxMana())  );
+		}
+	}
 
 	/**
 	 * Sync total experience.
 	 */
 	public void syncExperience() {
-		AlfClass secondClass = getSecondClass();
-		if (secondClass != null && ! this.syncPrimary)
-			syncExperience(secondClass);
-		else syncExperience(getAlfClass());
+		if (! this.manaGUI) {
+			AlfCore.log(Level.INFO, "Syncing experience...");
+			AlfClass secondClass = getSecondClass();
+			if (secondClass != null && ! this.syncPrimary)
+				syncExperience(secondClass);
+			else syncExperience(getAlfClass());
+		}
 	}
 
 	/**
 	 * Sync experience with the contained player.
 	 * @param ac
 	 */
-	public void syncExperience(AlfClass ac) {
+	public void syncExperience(AlfClass ac) { 
+		if (this.manaGUI)
+			return;
 		int level = getLevel(ac);
 		//Amount of XP to reach the current level.
 		int currentLevelXP = Properties.getTotalExp(level);
@@ -1494,6 +1515,23 @@ public class Alf extends CharacterTemplate {
 		//Standard procedure. Get the unit vector and multiply by the block distance magnitude.
 		location.add(location.getDirection().normalize().multiply(distance));
 		return location;
+	}
+
+	/**
+	 * Toggle whether mana/exp should be displayed via exp bar.
+	 */
+	public void toggleDisplayBar() {
+		this.manaGUI = ! this.manaGUI;
+		this.syncExperience();
+		this.syncMana();
+	}
+	
+	/**
+	 * Whether the player is displaying Mana through the display bar.
+	 * @return
+	 */
+	public boolean isManaDisplay() {
+		return this.manaGUI;
 	}
 
 }

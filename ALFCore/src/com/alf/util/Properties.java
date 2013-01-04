@@ -336,7 +336,7 @@ public class Properties {
 	/** Load Class Config. */
 	private void loadClassConfig(ConfigurationSection section) {
 		if (section != null) {
-			this.prefixClassName = section.getBoolean("use-prefix", false);
+			this.prefixClassName = section.getBoolean("use-prefix", true);
 			this.resetExpOnClassChange = section.getBoolean("reset-exp-on-change", true);
 			this.resetMasteryOnClassChange = section.getBoolean("reset-master-on-change", false);
 			this.resetProfMasteryOnClassChange = section.getBoolean("reset-prof-master-on-change", false);

@@ -50,7 +50,7 @@ public class ManaUpdater implements Runnable {
 					Bukkit.getServer().getPluginManager().callEvent(hrmEvent);
 					if (! hrmEvent.isCancelled()) {
 						alf.setMana(mana + hrmEvent.getAmount());
-						if (alf.isVerbose()) {
+						if (alf.isVerbose() && ! alf.isManaDisplay()) {
 							Messaging.send(alf.getPlayer(), ChatColor.BLUE + "MANA " + Messaging.createManaBar(alf.getMana(), alf.getMaxMana()), new Object[0]);
 						}
 					}

@@ -20,8 +20,8 @@ commands:
     description: Party command
     usage: /<command> <args>
   mana:
-    description: Mana command
-    usage: /<mana> 
+    description: energy command
+    usage: /<command> 
   shush:
     aliases: ['stfu', 'quiet']
     description: Toggle Aelf output

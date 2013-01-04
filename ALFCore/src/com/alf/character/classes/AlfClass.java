@@ -362,7 +362,7 @@ public class AlfClass implements Comparable<AlfClass> {
 	 * @return
 	 */
 	public Integer getItemDamage(Material material)
-	{	return (Integer)this.itemDamage.get(material);	}
+	{	return this.itemDamage.get(material);	}
 
 	/**
 	 * Get the damage level for a material.
@@ -467,11 +467,11 @@ public class AlfClass implements Comparable<AlfClass> {
 
 	/** Alter a particular item's base damage. */
 	protected void setItemDamage(Material material, int damage) 
-	{	this.itemDamage.put(material, Integer.valueOf(damage));	}
+	{	this.itemDamage.put(material, damage);	}
 
 	/** Alter a particular item's damage scaling factor. */
 	protected void setItemDamageLevel(Material material, double damage) 
-	{	this.itemDamageLevel.put(material, Double.valueOf(damage));	}
+	{	this.itemDamageLevel.put(material, damage);	}
 
 	/** Alter max health per level. */
 	protected void setMaxHealthPerLevel(double maxHealthPerLevel) 
@@ -487,11 +487,11 @@ public class AlfClass implements Comparable<AlfClass> {
 
 	/** Alter Base Projectile Damage */
 	protected void setProjectileDamage(CharacterDamageManager.ProjectileType type, int damage) 
-	{	this.projectileDamage.put(type, Integer.valueOf(damage));	}
+	{	this.projectileDamage.put(type, damage);	}
 
 	/** Alter Scaling Projectile Damage Factor. */
 	protected void setProjDamageLevel(CharacterDamageManager.ProjectileType type, double damage)
-	{	this.projDamageLevel.put(type, Double.valueOf(damage));	}
+	{	this.projDamageLevel.put(type, damage);	}
 
 	/** Set what Specialized Classes exist for this AlfClass. */
 	protected void setSpecializations(Set<AlfClass> specializations) 

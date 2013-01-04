@@ -326,7 +326,7 @@ public class AEntityListener implements Listener {
 		case CUSTOM:
 			break;
 		default:
-			event.setCancelled(true);
+//			event.setCancelled(true);
 		}
 	}
 

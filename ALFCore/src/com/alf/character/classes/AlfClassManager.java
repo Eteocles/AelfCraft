@@ -189,7 +189,6 @@ public class AlfClassManager {
 		AlfClass newClass = new AlfClass(className, this.plugin);
 
 		newClass.setDescription(config.getString("description", ""));
-		newClass.setDescription(config.getString("description", ""));
 		newClass.setExpModifier(config.getDouble("expmodifier", 1.0D));
 		newClass.setPrimary(config.getBoolean("primary", true));
 		newClass.setSecondary(config.getBoolean("secondary", false));

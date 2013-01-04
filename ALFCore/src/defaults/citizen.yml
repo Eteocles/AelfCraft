@@ -24,18 +24,22 @@ experience-sources:
 - QUESTING
 - EXTERNAL
 permission-skills:
-base-max-health: 20
+base-max-health: 400
 max-health-per-level: 0.1
 base-max-mana: 75
-max-mana-per-level: 1
+max-mana-per-level: 5
 mana-regen: 1
 mana-regen-per-level: .05
+base-max-stamina: 75
+max-stam-per-level: 5
+stamina-regen: 1
+stam-regen-per-level: .05
 expmodifier: 1.0
 item-damage:
-    air: 1
+    air: 40
 item-damage-level:
 projectile-damage:
-    Arrow: 3
+    Arrow: 60
 projectile-damage-level:
 expLoss: 0
 tier: 0

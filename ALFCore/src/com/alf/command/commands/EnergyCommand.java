@@ -12,7 +12,7 @@ import com.alf.util.Messaging;
  * A command that displays a player's mana.
  * @author Eteocles
  */
-public class ManaCommand extends BasicCommand {
+public class EnergyCommand extends BasicCommand {
 
 	private final AlfCore plugin;
 	
@@ -20,13 +20,13 @@ public class ManaCommand extends BasicCommand {
 	 * Construct the command.
 	 * @param plugin
 	 */
-	public ManaCommand(AlfCore plugin) {
-		super("Mana");
+	public EnergyCommand(AlfCore plugin) {
+		super("Energy");
 		this.plugin = plugin;
-		setDescription("Displays your current mana");
-		setUsage("/mana");
+		setDescription("Displays your current energy.");
+		setUsage("/energy");
 		setArgumentRange(0, 0);
-		setIdentifiers(new String[] { "mana", "aelf mana", "alf mana" });
+		setIdentifiers(new String[] { "mana", "energy", "alf energy", "alf mana" });
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class ManaCommand extends BasicCommand {
 		
 		int mana = alf.getMana();
 		int maxMana = alf.getMaxMana();
-		player.sendMessage("§9Mana: §f" + mana + "/" + maxMana + " " + Messaging.createManaBar(mana, maxMana));
+		player.sendMessage("§9Energy: §f" + mana + "/" + maxMana + " " + Messaging.createManaBar(mana, maxMana));
 		return true;
 	}
 
