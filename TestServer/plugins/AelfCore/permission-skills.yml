@@ -1,0 +1,8 @@
+Example:
+  usage: This is an EXAMPLE!
+  permissions:
+  - plugin.example.node.here
+Bandage:
+  usage: /skill bandage
+  permissions:
+  - alf.skill.bandage

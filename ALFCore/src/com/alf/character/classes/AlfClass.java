@@ -371,7 +371,7 @@ public class AlfClass implements Comparable<AlfClass> {
 	 */
 	public double getItemDamageLevel(Material mat)
 	{	return this.itemDamageLevel.containsKey(mat) ? (this.itemDamageLevel.get(mat)) : 0.0D;	}
-
+	
 	/**
 	 * Get the maximum amount of health added per level.
 	 * @return
@@ -472,7 +472,7 @@ public class AlfClass implements Comparable<AlfClass> {
 	/** Alter a particular item's damage scaling factor. */
 	protected void setItemDamageLevel(Material material, double damage) 
 	{	this.itemDamageLevel.put(material, damage);	}
-
+	
 	/** Alter max health per level. */
 	protected void setMaxHealthPerLevel(double maxHealthPerLevel) 
 	{	this.maxHealthPerLevel = maxHealthPerLevel;	}

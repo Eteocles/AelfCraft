@@ -1,0 +1,14 @@
+class: Mage
+verbose: true
+suppressed: []
+mana: 158
+health: 180
+skill-settings: {}
+cooldowns: {}
+experience:
+  Warrior: 4604.0
+  Rogue: 23640.0
+  Mage: 100000.0
+binds:
+  IRON_HOE: IceBolt
+  WOOD_HOE: FireBall

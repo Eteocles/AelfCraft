@@ -1,0 +1,7 @@
+audience channels:
+- announcer
+- guests
+- general
+talk channel: guests
+unread-mail: {}
+read-mail: {}

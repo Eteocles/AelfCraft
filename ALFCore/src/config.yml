@@ -1,7 +1,7 @@
 leveling:
     exp-curve: 1.0
     max-exp: 100000
-    max-level: 50
+    max-level: 30
     pad-max-level: true
     exp-loss: 0.10
     pvp-exp-loss: 1.0
@@ -12,10 +12,10 @@ leveling:
     spawner-checks: true
     spawner-exp-mult: .3
     reset-on-death: false
-    pvp-range: 50
+    pvp-range: 30
     min-pvp-level: 1
     pvp-exp-range: 10
-    pvp-max-exp-range: 40
+    pvp-max-exp-range: 30
     dump-exp-file: true
 classes:
     swap-cost: 5000

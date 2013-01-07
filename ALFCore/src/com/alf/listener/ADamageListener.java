@@ -2,6 +2,7 @@ package com.alf.listener;
 
 
 
+
 import net.minecraft.server.v1_4_6.EntityLiving;
 import net.minecraft.server.v1_4_6.MobEffectList;
 
@@ -44,6 +45,7 @@ import com.alf.character.CharacterTemplate;
 import com.alf.character.Monster;
 import com.alf.character.effect.Effect;
 import com.alf.character.effect.EffectType;
+import com.alf.character.effect.common.WardEffect;
 import com.alf.character.party.AlfParty;
 import com.alf.skill.Skill;
 import com.alf.skill.SkillType;
@@ -55,10 +57,10 @@ import com.alf.util.Util;
  * @author Eteocles
  */
 public class ADamageListener implements Listener {
-	
+
 	private AlfCore plugin;
 	private CharacterDamageManager dm;
-	
+
 	/**
 	 * Construct the listener.
 	 * @param plugin
@@ -68,7 +70,7 @@ public class ADamageListener implements Listener {
 		this.plugin = plugin;
 		this.dm = damageManager;
 	}
-	
+
 	/**
 	 * Handle potion damage.
 	 * @param event
@@ -78,9 +80,9 @@ public class ADamageListener implements Listener {
 		if (event.getAffectedEntities().isEmpty() ||
 				! (event.getPotion().getShooter() instanceof Player))
 			return;
-		
+
 		boolean remove = false;
-		
+
 		for (PotionEffect effect : event.getPotion().getEffects()) {
 			switch (effect.getType().getId()) {
 			case 2:
@@ -134,7 +136,7 @@ public class ADamageListener implements Listener {
 					event.setIntensity(le, 0.0D);
 		}
 	}
-	
+
 	/**
 	 * Handle entity health regeneration.
 	 * @param event
@@ -143,13 +145,13 @@ public class ADamageListener implements Listener {
 	public void onEntityRegainHealth(EntityRegainHealthEvent event) {
 		if (! (event.getEntity() instanceof Player))
 			return;
-		
+
 		int amount = event.getAmount();
 		Player player = (Player) event.getEntity();
 		final Alf alf = this.plugin.getCharacterManager().getAlf(player);
 		int maxHealth = alf.getMaxHealth();
 		double healPercent;
-		
+
 		switch (event.getRegainReason()) {
 		case CUSTOM:
 			break;
@@ -178,21 +180,21 @@ public class ADamageListener implements Listener {
 		default:
 			break;
 		}
-		
+
 		//Alf health calculation.
 		int newAlfHealth = alf.getHealth() + amount;
 		if (newAlfHealth > maxHealth)
 			newAlfHealth = maxHealth;
-		
+
 		//Scale alf health to match in-game health.
 		int newPlayerHealth = newAlfHealth / maxHealth * 20;
 		alf.setHealth(newAlfHealth);
-		
+
 		//Can't get negative health regain.
 		int newAmount = newPlayerHealth - player.getHealth();
 		if (newAmount < 0)
 			newAmount = 0;
-		
+
 		//Sync and update health.
 		event.setAmount(newAmount);
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
@@ -201,7 +203,7 @@ public class ADamageListener implements Listener {
 			}
 		});
 	}
-	
+
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onExplosionPrime(ExplosionPrimeEvent event) {
 		Entity entity = event.getEntity();
@@ -210,7 +212,7 @@ public class ADamageListener implements Listener {
 				event.setCancelled(true);
 		}
 	}
-	
+
 	/**
 	 * Handle entity damage events.
 	 * @param event
@@ -222,7 +224,7 @@ public class ADamageListener implements Listener {
 		AlfDamageCause lastDamage = null;
 		int damage = event.getDamage();
 		boolean skipEvent = false;
-		
+
 		//If the atttacker was an entity, get the attacking entity.
 		if (event instanceof EntityDamageByEntityEvent) {
 			attacker = ((EntityDamageByEntityEvent)event).getDamager();
@@ -233,18 +235,18 @@ public class ADamageListener implements Listener {
 					return;
 				}
 		}
-		
+
 		//Cancel handling if defender is dead or in creative mode.
 		if (defender instanceof LivingEntity) {
 			if (defender.isDead() || ((LivingEntity)defender).getHealth() <= 0)
 				return;
-			
+
 			if (this.plugin.getCharacterManager().getPet((LivingEntity)defender) != null) {
 				event.setDamage(0);
 				event.setCancelled(true);
 				return;
 			}
-			
+
 			if (defender instanceof Player) {
 				Player player = (Player) defender;
 				if (player.getGameMode() == GameMode.CREATIVE)
@@ -252,7 +254,7 @@ public class ADamageListener implements Listener {
 				lastDamage = this.plugin.getCharacterManager().getAlf((Player) defender).getLastDamageCause();
 			}
 		}
-		
+
 		//If defender is a spell target.
 		if (this.dm.isSpellTarget(defender)) {
 			skipEvent = true;
@@ -260,7 +262,7 @@ public class ADamageListener implements Listener {
 			damage = onSpellDamage(event, damage, defender);
 		} else {
 			EntityDamageEvent.DamageCause cause = event.getCause();
-			
+
 			switch (cause) {
 			case SUICIDE:
 				if (defender instanceof Player) {
@@ -320,14 +322,14 @@ public class ADamageListener implements Listener {
 			default:
 				break;
 			}
-			
+
 			if (event.isCancelled()) {
 				if (defender instanceof Player)
 					this.plugin.getCharacterManager().getAlf((Player) defender).setLastDamageCause(lastDamage);
 				return;
 			}
 		}
-		
+
 		//If the defender is a player...
 		if (defender instanceof Player) {
 			Player player = (Player) defender;
@@ -335,7 +337,7 @@ public class ADamageListener implements Listener {
 				event.setCancelled(true);
 				return;
 			}
-			
+
 			//Get the Alf rep.
 			final Alf alf = this.plugin.getCharacterManager().getAlf(player);
 			//Check inventory.
@@ -345,16 +347,16 @@ public class ADamageListener implements Listener {
 				event.setCancelled(true);
 				return;
 			}
-			
+
 			//Remove Invisibility effect on damage.
 			for (Effect effect : alf.getEffects()) {
 				if (effect.isType(EffectType.INVIS))
 					alf.removeEffect(effect);
 			}
-			
+
 			if (attacker instanceof Projectile)
 				attacker = ((Projectile) attacker).getShooter();
-			
+
 			if (attacker instanceof Player) {
 				//Attacking level.
 				int aLevel = this.plugin.getCharacterManager().getAlf((Player) attacker).getTieredLevel(false);
@@ -382,7 +384,7 @@ public class ADamageListener implements Listener {
 					return;
 				}
 			}
-			
+
 			//If event wasn't handled through other methods...
 			if (! skipEvent) {
 				CharacterDamageEvent cde = new CharacterDamageEvent(defender, 
@@ -395,22 +397,40 @@ public class ADamageListener implements Listener {
 				}
 				damage = cde.getDamage();
 			}
-			
+
 			if (damage == 0) {
 				event.setDamage(0);
 				return;
 			}
-			
+
 			switch (event.getCause()) {
+			case ENTITY_ATTACK:
+				if (attacker instanceof Player) {
+					double critChance = 0.10D;
+					Alf attAlf = this.plugin.getCharacterManager().getAlf((Player)attacker);
+					//Karma determines the chance of a critical hit. Not too impacting of an effect.
+					int karma = attAlf.getKarma();
+					if (karma < 50)
+						critChance = 0.10D*karma/50D;
+					if (critChance < 0)
+						critChance = 0;
+					if (Math.random() < critChance) {
+						damage *= 1.5D;
+						if (attAlf.isVerbose()) {
+							Messaging.send((Player) attacker, "You crit your enemy!", new Object[0]);
+						}
+					}
+					if (attAlf.isVerbose())
+						Messaging.send((Player) attacker, "You dealt $1 damage!", new Object[] { damage });
+				}
 			case BLOCK_EXPLOSION:
 			case CONTACT:
-			case ENTITY_ATTACK:
 			case ENTITY_EXPLOSION:
 			case LAVA:
 			case FIRE:
 			case PROJECTILE:
 			case FALLING_BLOCK:
-				alf.setHealth(alf.getHealth() - (int) Math.ceil(damage * calculateArmorReduction(player.getInventory())));
+				alf.setHealth(alf.getHealth() - (int) Math.ceil(damage * calculateArmorReduction(player, player.getInventory())));
 				break;
 			case DROWNING:
 			case FIRE_TICK:
@@ -425,13 +445,13 @@ public class ADamageListener implements Listener {
 			default:
 				alf.setHealth(alf.getHealth() - damage);
 			}
-			
+
 			//Set the damage for the event.
 			event.setDamage(convertAlfDamage(damage, alf));
-			
+
 			if (alf.getHealth() != 0 && player.getHealth() == 1 && event.getDamage() == 1)
 				player.setHealth(2);
-			
+
 			if (alf.getHealth() == 0)
 				event.setDamage(200);
 			else {
@@ -442,7 +462,7 @@ public class ADamageListener implements Listener {
 					}
 				}, 1L);
 			}
-			
+
 			AlfParty party = alf.getParty();
 			if (party != null && damage > 0)
 				party.update();
@@ -454,15 +474,32 @@ public class ADamageListener implements Listener {
 				event.setCancelled(true);
 				return;
 			}
-			
+
 			LivingEntity lEntity = (LivingEntity) defender;
 			Monster monster = this.plugin.getCharacterManager().getMonster(lEntity);
 			int currentHealth = monster.getHealth();
-			
+
 			switch (event.getCause()) {
+			case ENTITY_ATTACK:
+				if (attacker instanceof Player) {
+					double critChance = 0.10D;
+					Alf attAlf = this.plugin.getCharacterManager().getAlf((Player)attacker);
+					//Karma determines the chance of a critical hit. Not too impacting of an effect.
+					int karma = attAlf.getKarma();
+					if (karma < 50)
+						critChance = 0.10D*karma/50D;
+					if (critChance < 0)
+						critChance = 0;
+					if (Math.random() < critChance) {
+						damage *= 1.5D;
+						if (attAlf.isVerbose())
+							Messaging.send((Player) attacker, "You crit your enemy!", new Object[0]);
+					}
+					if (attAlf.isVerbose())
+						Messaging.send((Player) attacker, "You dealt $1 damage!", new Object[] { damage });
+				}
 			case BLOCK_EXPLOSION:
 			case CONTACT:
-			case ENTITY_ATTACK:
 			case ENTITY_EXPLOSION:
 			case LAVA:
 			case FIRE:
@@ -481,9 +518,9 @@ public class ADamageListener implements Listener {
 			case WITHER:
 			default:
 			}
-			
+
 			currentHealth -= damage;
-			
+
 			if (currentHealth <= 0) {
 				monster.setHealth(0);
 				damage = 10000;
@@ -491,7 +528,7 @@ public class ADamageListener implements Listener {
 				monster.setHealth(currentHealth);
 				damage = convertAlfDamage(damage, monster);
 				int newHealth = lEntity.getHealth() - damage;
-				
+
 				//
 				if (newHealth <= 0 && lEntity.getHealth() + 1 - newHealth > lEntity.getMaxHealth()) {
 					damage = damage + newHealth - 1;
@@ -503,12 +540,12 @@ public class ADamageListener implements Listener {
 							damage = 0;
 				} else if (newHealth <= 0)
 					lEntity.setHealth(lEntity.getHealth() + 1 - newHealth);
-				
+
 			}
 			event.setDamage(damage);
 		}
 	}
-	
+
 	/**
 	 * Core method for handling damage events.
 	 * @param event
@@ -519,9 +556,9 @@ public class ADamageListener implements Listener {
 	private int onEntityDamageCore(EntityDamageEvent event, Entity attacker, int damage) {
 		if (event.getDamage() == 0)
 			return 0;
-		
+
 		CharacterTemplate character = null;
-		
+
 		//Attacker is a player.
 		if (attacker instanceof Player) {
 			Player attackingPlayer = (Player) attacker;
@@ -535,7 +572,7 @@ public class ADamageListener implements Listener {
 			}
 			//
 			damage = getPlayerDamage(attackingPlayer, damage);
-			
+
 			if (alf.hasEffectType(EffectType.PHYS_BUFF)) {
 				double damageBuff = this.plugin.getDamageManager().getAlfDamageBuff(attackingPlayer);
 				damage += damageBuff * damage;
@@ -563,8 +600,8 @@ public class ADamageListener implements Listener {
 				damage = monster.getDamage();
 			}
 		}
-		
-		
+
+
 		//Attacker is a character (Alf or Monster from previous section).
 		if (character != null) {
 			WeaponDamageEvent wde = new WeaponDamageEvent(damage, (EntityDamageByEntityEvent) event, character);
@@ -575,16 +612,16 @@ public class ADamageListener implements Listener {
 			}
 			damage = wde.getDamage();
 		}
-		
+
 		//Person being attacked is a player.
 		if (event.getEntity() instanceof Player) {
 			Alf alf = this.plugin.getCharacterManager().getAlf((Player) event.getEntity());
 			alf.setLastDamageCause(new AlfAttackDamageCause(damage, event.getCause(), attacker));
 		}
-		
+
 		return damage;
 	}
-	
+
 	/**
 	 * Handle spell damage.
 	 * @param event
@@ -594,7 +631,7 @@ public class ADamageListener implements Listener {
 	 */
 	private int onSpellDamage(EntityDamageEvent event, int damage, Entity defender) {
 		SkillUseInfo skillInfo = this.dm.removeSpellTarget(defender);
-		
+
 		if (event instanceof EntityDamageByEntityEvent) {
 			if (resistanceCheck(defender, skillInfo.getSkill())) {
 				skillInfo.getSkill().broadcast(defender.getLocation(),
@@ -604,16 +641,16 @@ public class ADamageListener implements Listener {
 				event.setCancelled(true);
 				return 0;
 			}
-			
+
 			SkillDamageEvent spellDamageEvent = new SkillDamageEvent(damage, defender, skillInfo);
 			this.plugin.getServer().getPluginManager().callEvent(spellDamageEvent);
-			
+
 			//If the event is cancelled, no damaged is dealt.
 			if (spellDamageEvent.isCancelled()) {
 				event.setCancelled(true);
 				return 0;
 			}
-			
+
 			damage = spellDamageEvent.getDamage();
 			if (defender instanceof Player) {
 				this.plugin.getCharacterManager().getAlf((Player) defender).setLastDamageCause(
@@ -621,7 +658,7 @@ public class ADamageListener implements Listener {
 								skillInfo.getSkill()));
 			}
 		}
-		
+
 		return damage;
 	}
 
@@ -634,7 +671,7 @@ public class ADamageListener implements Listener {
 	private int onEntityStarve(double defaultDamage, Entity entity) {
 		if (! (entity instanceof LivingEntity))
 			return 0;
-		
+
 		Double percent = this.dm.getEnvironmentalDamage(EntityDamageEvent.DamageCause.STARVATION);
 		if (percent == null) {
 			if (entity instanceof Player) {
@@ -643,17 +680,17 @@ public class ADamageListener implements Listener {
 			}
 			return (int) defaultDamage;
 		}
-		
+
 		CharacterTemplate character = this.plugin.getCharacterManager().getCharacter((LivingEntity) entity);
 		percent = percent * character.getMaxHealth();
-		
+
 		if (character instanceof Alf)
 			((Alf)character).setLastDamageCause(new AlfDamageCause(percent.intValue(), EntityDamageEvent.DamageCause.STARVATION));
-		
-		
+
+
 		return percent < 1.0D ? 1 : percent.intValue();
 	}
-	
+
 	/**
 	 * Handle entity suffocation.
 	 * @param defaultDamage
@@ -671,16 +708,16 @@ public class ADamageListener implements Listener {
 			}
 			return (int) defaultDamage;
 		}
-		
+
 		CharacterTemplate character = this.plugin.getCharacterManager().getCharacter((LivingEntity) entity);
 		percent = percent * character.getMaxHealth();
-		
+
 		if (character instanceof Alf)
 			((Alf)character).setLastDamageCause(new AlfDamageCause(percent.intValue(), EntityDamageEvent.DamageCause.SUFFOCATION));
-		
+
 		return percent < 1.0D ? 1 : percent.intValue();
 	}
-	
+
 	/**
 	 * Handle entity drowning.
 	 * @param defaultDamage
@@ -691,7 +728,7 @@ public class ADamageListener implements Listener {
 	private int onEntityDrown(double defaultDamage, Entity entity, EntityDamageEvent event) {
 		if (! (entity instanceof LivingEntity))
 			return 0;
-		
+
 		Double percent = this.dm.getEnvironmentalDamage(EntityDamageEvent.DamageCause.DROWNING);
 		if (percent == null) {
 			if (entity instanceof Player) {
@@ -700,20 +737,20 @@ public class ADamageListener implements Listener {
 			}
 			return (int) defaultDamage;
 		}
-		
+
 		CharacterTemplate character = this.plugin.getCharacterManager().getCharacter((LivingEntity) entity);
 		if (character.hasEffectType(EffectType.WATER_BREATHING)) {
 			event.setCancelled(true);
 			return 0;
 		}
-		
+
 		percent = percent * character.getMaxHealth();
 		if (character instanceof Alf)
 			((Alf) character).setLastDamageCause(new AlfDamageCause(percent.intValue(), EntityDamageEvent.DamageCause.DROWNING));
-		
+
 		return percent < 1.0D ? 1 : percent.intValue();
 	}
-	
+
 	/**
 	 * Handle entity poisoning.
 	 * @param defaultDamage
@@ -724,9 +761,9 @@ public class ADamageListener implements Listener {
 	private int onEntityPoison(double defaultDamage, Entity entity, EntityDamageEvent event) {
 		if (! (entity instanceof LivingEntity))
 			return 0;
-		
+
 		Double damage = this.dm.getEnvironmentalDamage(EntityDamageEvent.DamageCause.POISON);
-		
+
 		if (damage == null) {
 			if (entity instanceof Player) {
 				Alf alf = this.plugin.getCharacterManager().getAlf((Player) entity);
@@ -734,22 +771,22 @@ public class ADamageListener implements Listener {
 			}
 			return (int) defaultDamage;
 		}
-		
+
 		//Cancel if resist poison.
 		CharacterTemplate character = this.plugin.getCharacterManager().getCharacter((LivingEntity) entity);
 		if (character.hasEffectType(EffectType.RESIST_POISON)) {
 			event.setCancelled(true);
 			return 0;
 		}
-		
+
 		//Set the last damage cause for the Alf.
 		if (character instanceof Alf)
 			((Alf)character).setLastDamageCause(new AlfDamageCause(damage.intValue(), 
 					EntityDamageEvent.DamageCause.POISON));
-		
+
 		return damage.intValue();
 	}
-	
+
 	/**
 	 * Handle entity flame damage.
 	 * @param defaultDamage
@@ -761,7 +798,7 @@ public class ADamageListener implements Listener {
 	private int onEntityFlame(double defaultDamage, EntityDamageEvent.DamageCause cause,
 			Entity entity, EntityDamageEvent event) {
 		Double damage = this.dm.getEnvironmentalDamage(cause);
-		
+
 		//If the damage cause wasn't registered...
 		if (damage == null) {
 			if (entity instanceof Player) {
@@ -770,9 +807,9 @@ public class ADamageListener implements Listener {
 			}
 			return (int) defaultDamage;
 		}
-		
+
 		CharacterTemplate character = null;
-		
+
 		//If entity has fire resistance, deal no damage.
 		if (entity instanceof LivingEntity) {
 			EntityLiving el = ((CraftLivingEntity)entity).getHandle();
@@ -782,26 +819,26 @@ public class ADamageListener implements Listener {
 			}
 			character = this.plugin.getCharacterManager().getCharacter((LivingEntity) entity);
 		}
-		
+
 		if (damage == 0.0D)
 			return 0;
-		
+
 		if (character != null) {
 			//If the character has fire resistance effect type.
 			if (character.hasEffectType(EffectType.RESIST_FIRE)) {
 				event.setCancelled(true);
 				return 0;
 			}
-			
+
 			if (cause != EntityDamageEvent.DamageCause.FIRE_TICK)
 				damage = damage * character.getMaxHealth();
 			if (character instanceof Alf)
 				((Alf) character).setLastDamageCause(new AlfDamageCause(damage.intValue(), cause));
 		}
-		
+
 		return damage < 1.0D ? 1 : damage.intValue();
 	}
-	
+
 	/**
 	 * Handle entity fall.
 	 * @param damage
@@ -812,32 +849,32 @@ public class ADamageListener implements Listener {
 	private int onEntityFall(int damage, Entity entity, EntityDamageEvent event) {
 		if (! (entity instanceof LivingEntity)) 
 			return 0;
-		
+
 		Double damagePercent = this.dm.getEnvironmentalDamage(EntityDamageEvent.DamageCause.FALL);
-		
+
 		if (damagePercent == null)
 			return damage;
-		
+
 		//Reduce damage by feather fall calculation.
 		if (entity instanceof HumanEntity)
 			damage -= Util.getFeatherFallLevel(((HumanEntity)entity).getInventory());
-		
+
 		//Cancel the event if no damage was dealt.
 		if (damage <= 0) {
 			event.setCancelled(true);
 			return 0;
 		}
-		
+
 		CharacterTemplate character = this.plugin.getCharacterManager().getCharacter((LivingEntity) entity);
 		if (character.hasEffectType(EffectType.SAFEFALL)) {
 			event.setCancelled(true);
 			return 0;
 		}
-		
+
 		damage = (int) (damage * damagePercent * character.getMaxHealth());
 		return (damage < 1) ? 1 : damage;
 	}
-	
+
 	/**
 	 * Calculate armor reduction for a living entity.
 	 * @param lEntity
@@ -845,9 +882,9 @@ public class ADamageListener implements Listener {
 	 */
 	private double calculateArmorReduction(LivingEntity lEntity) {
 		if (lEntity instanceof Player)
-			return calculateArmorReduction( ((Player)lEntity).getInventory() );
+			return calculateArmorReduction((Player)lEntity, ((Player)lEntity).getInventory() );
 		int armor = 0;
-		
+
 		switch (lEntity.getType()) {
 		case SKELETON:
 		case ZOMBIE:
@@ -869,15 +906,15 @@ public class ADamageListener implements Listener {
 		default:
 			break;
 		}
-		
+
 		armor += calculateArmorReduction(lEntity.getEquipment());
-		
+
 		if (armor >= 25)
 			armor = 24;
-		
+
 		return (25.0D - armor) / 25.0D;
 	}
-	
+
 	/**
 	 * Get the armor reduction for an entity armor equip.
 	 * @param inventory
@@ -885,7 +922,7 @@ public class ADamageListener implements Listener {
 	 */
 	private double calculateArmorReduction(EntityEquipment inventory) {
 		int armorPoints = 0;
-		
+
 		for (ItemStack armor : inventory.getArmorContents()) {
 			if (armor != null) {
 				switch (armor.getType()) {
@@ -926,17 +963,27 @@ public class ADamageListener implements Listener {
 				}
 			}
 		}
-		
+
 		return armorPoints;
 	}
-	
+
 	/**
 	 * Calculate damage reduction by armor.
 	 * @param inventory
 	 * @return
 	 */
-	private double calculateArmorReduction(PlayerInventory inventory) {
+	private double calculateArmorReduction(Player player, PlayerInventory inventory) {
 		int armorPoints = 0;
+
+		Alf alf = this.plugin.getCharacterManager().getAlf(player);
+		double wardMult = -1;
+		if (alf.hasEffectType(EffectType.WARD)) {
+			for (Effect e : alf.getEffects()) {
+				if (e.isType(EffectType.WARD)) {
+					wardMult = Math.max(wardMult, ((WardEffect)e).getArmorRating());
+				}
+			}
+		}
 		
 		for (ItemStack armor : inventory.getArmorContents()) {
 			if (armor != null) {
@@ -978,10 +1025,11 @@ public class ADamageListener implements Listener {
 				}
 			}
 		}
-		
+		armorPoints +=  armorPoints*wardMult;
+		armorPoints = (armorPoints > 25) ? 25 : armorPoints;
 		return (25 - armorPoints) / 25.0D;
 	}
-	
+
 	/**
 	 * Get the player damage dealt.
 	 * @param attacker
@@ -991,12 +1039,14 @@ public class ADamageListener implements Listener {
 	private int getPlayerDamage(Player attacker, int damage) {
 		ItemStack weapon = attacker.getItemInHand();
 		Material weaponType = weapon.getType();
-		
+
+		//Depending on a material there is a certain range of weapon damage percentile
+
 		Integer tmpDamage = this.dm.getItemDamage(weaponType, attacker);
-		
+
 		return tmpDamage == null ? damage : tmpDamage;
 	}
-	
+
 	/**
 	 * Get a player's projectile damage.
 	 * @param attacker
@@ -1009,7 +1059,7 @@ public class ADamageListener implements Listener {
 				attacker);
 		return tmpDamage == null ? damage : tmpDamage;
 	}
-	
+
 	/**
 	 * Check if the player has a resistance.
 	 * @param defender
@@ -1032,7 +1082,7 @@ public class ADamageListener implements Listener {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Convert damage in terms of the plugin and vanilla's health.
 	 * @param d
@@ -1044,8 +1094,8 @@ public class ADamageListener implements Listener {
 		int damage = (int)(character.getEntity().getMaxHealth() / maxHealth * d);
 		if (damage == 0)
 			damage = 1;
-		
+
 		return damage;
 	}
-	
+
 }

@@ -8,9 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -20,7 +17,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
 import com.alf.AlfCore;
@@ -51,7 +47,7 @@ public class SkillStarBurst extends ActiveSkill {
 		setUsage("/skill starburst");
 		setArgumentRange(0,0);
 		setIdentifiers(new String[] { "skill starburst" });
-		setTypes(new SkillType[] {SkillType.TEXT});
+		setTypes(new SkillType[] {SkillType.DAMAGING, SkillType.MOVEMENT, SkillType.PHYSICAL});
 		setUseText("%alf% uses %skill%");
 		Bukkit.getServer().getPluginManager().registerEvents(new SkillEntityListener(this), plugin);
 		setFireworkEffect(FireworkEffect.builder().flicker(true).withColor(Color.RED).withColor(Color.MAROON).trail(true).with(Type.BURST).build());
@@ -72,31 +68,6 @@ public class SkillStarBurst extends ActiveSkill {
 	}
 
 	/**
-	 * Check whether a path of blocks is clear to charge through.
-	 * @param world - world to check in
-	 * @param loc1 - block in path
-	 * @param loc2 - last block in path
-	 * @param offset - vertical y offset
-	 * @param blocks - number of blocks to check
-	 * @return whether the path is blocked or not
-	 */
-	private boolean isWayBlocked(World world, Location loc1, Location loc2, double offset, int blocks) {
-		boolean blocked = false;
-		BlockIterator bi = new BlockIterator(world, 
-				loc1.toVector(), 
-				loc2.subtract(loc1).toVector(), 
-				offset, blocks);
-		for (Block b = bi.next(); b != null;) {
-			if (! Util.transparentBlocks.contains(b.getType()))
-				blocked = true;
-			if (bi.hasNext())
-				b = bi.next();
-			else b = null;
-		}
-		return blocked;
-	}
-
-	/**
 	 * Charge the player and add delayed check for skill end.
 	 */
 	public SkillResult use(Alf alf, String[] args)
@@ -110,8 +81,8 @@ public class SkillStarBurst extends ActiveSkill {
 		double[] vector = Util.toCartesian(yaw, pitch, 3);
 		Vector v = new Vector(vector[0], 0, vector[2]);
 
-		if (isWayBlocked(player.getWorld(), player.getEyeLocation(), player.getEyeLocation().add(v), 0, 4) || 
-				isWayBlocked(player.getWorld(), player.getLocation(), player.getLocation().add(v), 0, 4)) {
+		if (Util.isWayBlocked(player.getWorld(), player.getEyeLocation(), player.getEyeLocation().add(v), 0, 4) || 
+				Util.isWayBlocked(player.getWorld(), player.getLocation(), player.getLocation().add(v), 0, 4)) {
 			Messaging.send(player, "You can not use that skill as the way is blocked!", new Object[0]);
 			return SkillResult.FAIL;
 		}

@@ -1,0 +1,11 @@
+audience channels:
+- guests
+- general
+talk channel: general
+unread-mail:
+  Eteocles:
+  - ''
+  - ''
+  - ''
+  - ''
+read-mail: {}

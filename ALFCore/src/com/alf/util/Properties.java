@@ -187,7 +187,7 @@ public class Properties {
 		if (section != null) {
 			this.power = Util.toDoubleNonNull(section.get("exp-curve", 1.0D), "exp-curve");
 			maxExp = Util.toIntNonNull(section.get("max-exp", 100000), "max-exp");
-			maxLevel = Util.toIntNonNull(section.get("max-level", 20), "max-level");
+			maxLevel = Util.toIntNonNull(section.get("max-level", 30), "max-level");
 			padMaxLevel = section.getBoolean("pad-max-level", true);
 			this.maxPartySize = Util.toIntNonNull(section.get("max-party-size"), "max-party-size");
 			this.partyBonus = Util.toDoubleNonNull(section.get("party-exp-bonus", 0.2D), "party-exp-bonus");
@@ -198,14 +198,14 @@ public class Properties {
 			this.noSpawnCamp = section.getBoolean("spawner-checks", false);
 			this.spawnCampExpMult = Util.toDoubleNonNull(section.get("spawner-exp-mult", 0.5D), "spawner-exp-mult");
 			this.resetOnDeath = section.getBoolean("reset-on-death", false);
-			this.pvpLevelRange = Util.toIntNonNull(section.get("pvp-range", 50), "pvp-range");
+			this.pvpLevelRange = Util.toIntNonNull(section.get("pvp-range", 30), "pvp-range");
 			this.minPvpLevel = Util.toIntNonNull(section.get("min-pvp-level", 1), "min-pvp-level");
 			this.pvpExpRange = Util.toIntNonNull(section.get("pvp-exp-range", 10), "pvp-exp-range");
-			this.pvpMaxExpRange = Util.toIntNonNull(section.get("pvp-max-exp-range", 40), "pvp-max-exp-range");
+			this.pvpMaxExpRange = Util.toIntNonNull(section.get("pvp-max-exp-range", 30), "pvp-max-exp-range");
 			this.pvpMaxExpRange -= this.pvpExpRange;
 			AlfCore.log(Level.INFO, "Minimum PvP level is set to: " + this.minPvpLevel);
 			calcExp();
-			if (section.getBoolean("dum-exp-false", false))
+			if (section.getBoolean("dump-exp-file", false))
 				dumpExpLevels();
 			calcPartyMultipliers();
 		}

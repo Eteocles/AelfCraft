@@ -1,0 +1,10 @@
+2012-12-30 09:17:23 [INFO] [ALF] Minimum PvP level is set to: 1
+2012-12-30 09:17:23 [INFO] Allowed Armor -  LEATHER_HELMET LEATHER_LEGGINGS LEATHER_BOOTS LEATHER_CHESTPLATE GOLD_HELMET GOLD_LEGGINGS GOLD_CHESTPLATE GOLD_BOOTS
+2012-12-30 09:17:23 [INFO] Allowed weapons -  FISHING_ROD SHEARS STONE_PICKAXE STONE_AXE STONE_SWORD STONE_SPADE STONE_HOE
+2012-12-30 09:17:23 [WARNING] [ALF] Invalid experience source (CRAFTING) defined for Citizen. Skipping this source.
+2012-12-30 09:17:23 [SEVERE] [ALF] No recipe group named default defined in recipes.yml. Check Citizen for errors or add the recipe group!
+2012-12-30 09:17:23 [INFO] Default class found: Citizen
+2012-12-30 09:17:23 [INFO] [ALF] Loaded class: Citizen
+2012-12-30 09:17:23 [INFO] [ALF] version 0.0 is enabled!
+2012-12-30 09:17:25 [INFO] [ALF] Loaded alf: Eteocles with EID: 191
+2012-12-30 09:17:31 [INFO] [ALF] Saved alf: Eteocles

@@ -9,6 +9,7 @@ public enum EffectType {
 	BLEED,
 	BLIND,
 	PHYS_BUFF,
+	DARK,
 	DISABLE,
 	DISARM,
 	DISPELLABLE,
@@ -35,6 +36,7 @@ public enum EffectType {
 	SLOW,
 	SNEAK,
 	STUN,
+	WARD,
 	WATER_BREATHING,
 	WOUNDING;
 }

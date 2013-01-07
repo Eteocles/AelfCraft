@@ -59,7 +59,7 @@ public class SlowEffect extends ExpirableEffect {
 	public void applyToAlf(Alf alf) {
 		super.applyToAlf(alf);
 		Player player = alf.getPlayer();
-		broadcast(player.getLocation(), this.expireText, new Object[] { player.getDisplayName() });
+		broadcast(player.getLocation(), this.applyText, new Object[] { player.getDisplayName() });
 	}
 	
 	/**

@@ -1,0 +1,72 @@
+creature-health: #player default health 400
+    Chicken: 25
+    Cow: 70
+    Creeper: 200
+    Ghast: 150
+    Giant: 1500
+    Pig: 60
+    PigZombie: 200
+    Sheep: 50
+    Skeleton: 200
+    Ozelot: 60
+    Slime: 100 #Know that Slime health is decreased incrementally.
+    Spider: 200
+    Squid: 50
+    Zombie: 225
+    Wolf: 60
+    CaveSpider: 180
+    Enderman: 200
+    EnderDragon: 10000
+    Silverfish: 40
+    Villager: 80
+    Blaze: 200
+    MushroomCow: 80
+    LavaSlime: 85
+    SnowMan: 30
+    VillagerGolem: 800
+    Bat: 50
+    Witch: 150
+    WitherBoss: 9001
+    WitherSkull: 250 
+creature-damage:
+    Creeper: 500
+    Giant: 380
+    Zombie: 80
+    PigZombie: 120
+    EnderDragon: 400
+    Wolf: 40
+    Enderman: 350
+    Skeleton: 65
+    Spider: 100
+    CaveSpider: 50
+    SnowMan: 0
+    VillagerGolem: 200
+    Ozelot: 70
+    Slime: 250
+    LavaSlime: 200
+    Blaze: 200
+    WitherBoss: 350
+material-base-damage:
+    WOOD: 15
+    GOLD: 20
+    IRON: 20
+    DIAMOND: 25
+material-damage-variance:
+    WOOD: 0.17
+    GOLD: 0.50
+    IRON: 0.22
+    DIAMOND: 0.19
+gapping: 12
+item-damage:
+    Air: 10
+environmental-damage:
+    FALL: .1 #per block above 3
+    LAVA: .2
+    FIRE: .2
+    FIRE_TICK: 1
+    POISON: 1
+    SUFFOCATION: .05
+    DROWNING: .1
+    STARVATION: .05
+potions:
+    health-per-tier: .1

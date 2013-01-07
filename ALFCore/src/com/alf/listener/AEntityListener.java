@@ -329,7 +329,7 @@ public class AEntityListener implements Listener {
 //			event.setCancelled(true);
 		}
 	}
-
+	
 	/**
 	 * Find the scaling factor for an attacker of a certain level and a defender of a certain level.
 	 * @param aLevel

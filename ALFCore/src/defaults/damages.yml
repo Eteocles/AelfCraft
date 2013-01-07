@@ -37,23 +37,34 @@ creature-damage:
     Wolf: 40
     Enderman: 350
     Skeleton: 65
-    Spider: 100
+    Spider: 80
     CaveSpider: 50
     SnowMan: 0
     VillagerGolem: 200
     Ozelot: 70
-    Slime: 250
-    LavaSlime: 200
-    Blaze: 200
+    Slime: 150
+    LavaSlime: 125
+    Blaze: 165
     WitherBoss: 350
+material-base-damage: #Weapons of this type will have this base
+    WOOD: 15
+    GOLD: 20
+    IRON: 20
+    DIAMOND: 25
+material-damage-variance: #Variance for calculating dmg range
+    WOOD: 0.17
+    GOLD: 0.50
+    IRON: 0.22
+    DIAMOND: 0.19
+gapping: 12 #Exponent for calculating dmg range
 item-damage:
-    Air: 13
+    Air: 10
 environmental-damage:
     FALL: .1 #per block above 3
     LAVA: .2
     FIRE: .2
-    FIRE_TICK: 1
-    POISON: 1
+    FIRE_TICK: 20
+    POISON: 20
     SUFFOCATION: .05
     DROWNING: .1
     STARVATION: .05

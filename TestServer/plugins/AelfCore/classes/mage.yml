@@ -1,0 +1,66 @@
+name: Mage
+default: false
+wildcard-permission: true
+primary: true
+secondary: false
+description: The mystic fighter well versed in spells and runes.
+permitted-armor:
+- LEATHER
+permitted-weapon:
+- WOOD
+- STONE
+- IRON_HOE
+- IRON_SPADE
+item-damage:
+    WOOD_SPADE: 10
+    WOOD_PICK: 12
+    WOOD_HOE: 14
+    STONE_SPADE: 15
+    STONE_PICK: 18
+    STONE_HOE: 23
+    IRON_HOE: 32
+    IRON_SPADE: 20
+permitted-skills:
+  Bandage:
+        level: 1
+        cooldown: 60000
+        mana: 10
+  FireBall:
+        level: 3
+        mana: 10
+        cooldown: 12000
+  IceBolt:
+        level: 5
+        mana: 10
+        cooldown: 12000
+  AirBlast:
+        level: 15
+        mana: 20
+        cooldown: 15000
+  LesserWard:
+        level: 20
+        mana: 40
+        cooldown: 60000
+  Blink:
+        level: 25
+        cooldown: 30000
+        mana: 30
+experience-sources:
+- KILLING
+- PVP
+- QUESTING
+- EXTERNAL
+permission-skills:
+base-max-health: 400
+max-health-per-level: 0.5
+base-max-mana: 100
+max-mana-per-level: 2
+mana-regen: 5
+mana-regen-per-level: .05
+expmodifier: 1.0
+item-damage-level:
+projectile-damage:
+projectile-damage-level:
+expLoss: 0
+tier: 0
+recipes: [ default ]

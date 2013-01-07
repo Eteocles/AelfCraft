@@ -402,45 +402,7 @@ public class AlfClassManager {
 	private void loadDamages(AlfClass newClass, Configuration config) {
 		String className = newClass.getName();
 		//Item Base Damage
-		ConfigurationSection section = config.getConfigurationSection("item-damage");
-
-		if (section != null) {
-			Set<String> itemDamages = section.getKeys(false);
-			if (itemDamages == null || itemDamages.isEmpty())
-				AlfCore.log(Level.WARNING, className+" has no item-damage section");
-			else {
-				for (String materialName : itemDamages) {
-					Material material = Material.matchMaterial(materialName);
-					if (material != null && (section.get(materialName) instanceof Number)) {
-						int damage = section.getInt(materialName);
-						newClass.setItemDamage(material, damage);
-					} else {
-						AlfCore.log(Level.WARNING, "Invalid item-damage ("+materialName+") defined for " + className);
-					}
-				}
-			}
-
-		}
-
-		//Item Damage by Level
-		section = config.getConfigurationSection("item-damage-level");
-		if (section != null) {
-			Set<String> itemDamages = section.getKeys(false);
-			if (itemDamages == null || itemDamages.isEmpty())
-				AlfCore.log(Level.WARNING, className+" has no item-damage-level section");
-			else {
-				for (String materialName : itemDamages) {
-					Material material = Material.matchMaterial(materialName);
-					if (material != null && (section.get(materialName) instanceof Number)) {
-						double damage = section.getDouble(materialName);
-						newClass.setItemDamageLevel(material, damage);
-					} else {
-						AlfCore.log(Level.WARNING, "Invalid item-damage-level ("+materialName+") defined for "+className);
-					}
-				}
-			}
-
-		}
+		ConfigurationSection section;
 
 		//Projectile Base Damage
 		section = config.getConfigurationSection("projectile-damage");

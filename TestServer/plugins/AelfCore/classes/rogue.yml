@@ -1,0 +1,64 @@
+name: Rogue
+default: false
+wildcard-permission: true
+primary: true
+secondary: false
+description: The cunning fighter swift on foot.
+permitted-armor:
+- LEATHER
+permitted-weapon:
+- WOOD
+- STONE
+- IRON_SPADE
+- IRON_SWORD
+- GOLD_SPADE
+- GOLD_SWORD
+item-damage:
+    WOOD_SPADE: 10
+    WOOD_SWORD: 14
+    STONE_SPADE: 15
+    STONE_SWORD: 21 
+    IRON_SPADE: 20
+    IRON_SWORD: 30
+    GOLD_SPADE: 20
+    GOLD_SWORD: 32
+permitted-skills:
+  Bandage:
+        level: 1
+        cooldown: 60000
+        mana: 10
+  Dash:
+        level: 3
+        cooldown: 4000
+        mana: 5
+  Sneak: 
+        level: 5
+  Blind:
+        level: 20
+        cooldown: 30000
+        mana: 20
+  PoisonBlade:
+        level: 15
+        cooldown: 20000
+        mana: 15
+  LightFoot: #passive skill
+        level: 30
+experience-sources:
+- KILLING
+- PVP
+- QUESTING
+- EXTERNAL
+permission-skills:
+base-max-health: 350
+max-health-per-level: 0.5
+base-max-mana: 100
+max-mana-per-level: 1
+mana-regen: 3
+mana-regen-per-level: .05
+expmodifier: 1.0
+item-damage-level:
+projectile-damage:
+projectile-damage-level:
+expLoss: 0
+tier: 0
+recipes: [ default ]

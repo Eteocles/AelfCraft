@@ -14,6 +14,7 @@ import net.minecraft.server.v1_4_6.EntityLiving;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_4_6.entity.CraftLivingEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
@@ -24,6 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.util.BlockIterator;
 
 import com.alf.AlfCore;
 import com.alf.character.Alf;
@@ -46,6 +48,10 @@ public class Util {
 	public static final List<String> weapons;
 	public static final List<String> armors;
 	public static final List<String> tools;
+	public static final List<String> woodWeps;
+	public static final List<String> goldWeps;
+	public static final List<String> ironWeps;
+	public static final List<String> diamondWeps;
 
 	public static final HashMap<String, Location> deaths = new LinkedHashMap<String, Location>() {
 		private static final long serialVersionUID = -5160276589164566330L;
@@ -54,7 +60,40 @@ public class Util {
 			return size() > MAX_ENTRIES;
 		}
 	};
+	
+	/**
+	 * Check whether a path of blocks is clear to charge through.
+	 * @param world - world to check in
+	 * @param loc1 - block in path
+	 * @param loc2 - last block in path
+	 * @param offset - vertical y offset
+	 * @param blocks - number of blocks to check
+	 * @return whether the path is blocked or not
+	 */
+	public static boolean isWayBlocked(World world, Location loc1, Location loc2, double offset, int blocks) {
+		boolean blocked = false;
+		BlockIterator bi = new BlockIterator(world, 
+				loc1.toVector(), 
+				loc2.subtract(loc1).toVector(), 
+				offset, blocks);
+		for (Block b = bi.next(); b != null;) {
+			if (! Util.transparentBlocks.contains(b.getType()))
+				blocked = true;
+			if (bi.hasNext())
+				b = bi.next();
+			else b = null;
+		}
+		return blocked;
+	}
 
+	/**
+	 * Spawn a pet at a given location.
+	 * @param plugin
+	 * @param alf
+	 * @param petType
+	 * @param location
+	 * @return
+	 */
 	public static Pet spawnPet(AlfCore plugin, Alf alf, EntityType petType, Location location) {
 		World w = location.getWorld();
 
@@ -108,6 +147,10 @@ public class Util {
 		}
 		//Add to inventory in empty spot.
 		inv.setItem(empty, item);
+		
+		if (slot != -1)
+			inv.clear(slot);
+		Messaging.send(player, "You are not trained to use a $1.", new Object[] { MaterialUtil.getFriendlyName(item.getType()) });
 		return true;
 	}
 
@@ -230,6 +273,7 @@ public class Util {
 		case BOW:
 		case SNOW_BALL:
 		case FISHING_ROD:
+			return true;
 		default:
 			return false;
 		}
@@ -437,7 +481,35 @@ public class Util {
 		hoes.add("IRON_HOE");
 		hoes.add("GOLD_HOE");
 		hoes.add("DIAMOND_HOE");
-
+		
+		woodWeps = new ArrayList<String>(5);
+		woodWeps.add("WOOD_SWORD");
+		woodWeps.add("WOOD_AXE");
+		woodWeps.add("WOOD_SPADE");
+		woodWeps.add("WOOD_PICKAXE");
+		woodWeps.add("WOOD_HOE");
+		
+		goldWeps = new ArrayList<String>(5);
+		goldWeps.add("GOLD_SWORD");
+		goldWeps.add("GOLD_AXE");
+		goldWeps.add("GOLD_SPADE");
+		goldWeps.add("GOLD_PICKAXE");
+		goldWeps.add("GOLD_HOE");
+		
+		ironWeps = new ArrayList<String>(5);
+		ironWeps.add("IRON_SWORD");
+		ironWeps.add("IRON_AXE");
+		ironWeps.add("IRON_SPADE");
+		ironWeps.add("IRON_PICKAXE");
+		ironWeps.add("IRON_HOE");
+		
+		diamondWeps = new ArrayList<String>(5);
+		diamondWeps.add("DIAMOND_SWORD");
+		diamondWeps.add("DIAMOND_AXE");
+		diamondWeps.add("DIAMOND_SPADE");
+		diamondWeps.add("DIAMOND_PICKAXE");
+		diamondWeps.add("DIAMOND_HOE");
+		
 		tools = new ArrayList<String>(2);
 		tools.add("SHEARS");
 		tools.add("FISHING_ROD");

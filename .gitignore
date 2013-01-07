@@ -2,18 +2,32 @@
 *.project
 *.settings
 *.metadata
+
 ALFCore/bin/
 ALFChat/bin/
 ChilldyChat/
 ChilldyRPG/
 CraftBukkit/
+
+SkillAirBlast/bin/
+SkillBandage/bin/
+SkillBlind/bin/
+SkillBlink/bin
 SkillBrawn/bin/
+SkillDash/bin/
+SkillDisarm/bin/
+SkillFireball/bin/
 SkillForce/bin/
+SkillIceBolt/bin/
+SkillLesserWard/bin/
+SkillPoisonBlade/bin/
+SkillPummel/bin/
 SkillRoar/bin/
 SkillShout/bin/
+SkillSneak/bin/
 SkillStarBurst/bin/
 SkillTame/bin/
-CraftBukkit/
+
 
 
 #this is a comment

@@ -64,7 +64,7 @@ public class SkillForce extends ActiveSkill {
 
 				double xDir = targetLoc.getX() - playerLoc.getX();
 				double zDir = targetLoc.getZ() - playerLoc.getZ();
-				Vector v = new Vector(xDir, 0.5D, zDir);
+				Vector v = new Vector(xDir/3, 0.5D, zDir/3);
 				e.setVelocity(v);
 
 				CharacterTemplate chara = this.plugin.getCharacterManager().getCharacter((LivingEntity)e);

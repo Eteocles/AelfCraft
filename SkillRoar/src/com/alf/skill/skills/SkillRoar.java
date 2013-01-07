@@ -26,8 +26,6 @@ import com.alf.util.Setting;
  */
 public class SkillRoar extends ActiveSkill {
 
-	private final AlfCore plugin;
-	
 	public SkillRoar(AlfCore plugin) {
 		super(plugin, "Roar");
 		setDescription("You roar to taunt nearby enemies into targeting you.");
@@ -36,8 +34,6 @@ public class SkillRoar extends ActiveSkill {
 		setIdentifiers(new String[] { "skill roar" });
 		setTypes(new SkillType[] { SkillType.PHYSICAL });
 		setUseText("%alf% uses %skill%!");
-		
-		this.plugin = plugin;
 	}
 	
 	/**

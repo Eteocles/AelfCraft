@@ -1,0 +1,89 @@
+Shout:
+  use-text: '%alf% used %skill%!'
+Bandage:
+  use-text: '%alf% used %skill%!'
+  health-per-level: 0.06
+  duration: 3000
+  duration-per-level: 100
+  delay: 2000
+FireBall:
+  use-text: '%alf% used %skill%!'
+  damage: 20
+  damage-per-level: 0.05
+  velocity-mult: 1.5
+  fire-ticks: 100
+IceBolt:
+  use-text: '%alf% used %skill%!'
+  damage: 20
+  damage-per-level: 0.05
+  velocity-mult: 6.0
+  slow-duration: 100
+AirBlast:
+  use-text: '%alf% used %skill% on %target%!'
+  max-distance: 15
+LesserWard:
+  use-text: '%alf% used %skill%!'
+  duration: 15000
+Blink:
+  use-text: '%alf% used %skill%!'
+  max-distance: 6
+  restrict-ender-pearl: true
+Dash:
+  use-text: '%alf% used %skill%!'
+  velocity: 1.5
+  velocity-by-level: 0.1
+  velocity-max: 3.0
+Sneak:
+  use-text: '%alf% used %skill%!'
+  duration: 600000
+  damage-cancels: true
+  attacking-cancels: true
+  refresh-interval: 5000
+Blind:
+  use-text: '%alf% used %skill% on %target%!'
+  max-distance: 15
+  duration: 3000
+  duration-per-level: 0.5
+PoisonBlade:
+  use-text: '%alf% used %skill%!'
+  poison-damage: 15
+  period: 2000
+  duration: 10000
+  duration-per-level: 1
+Roar:
+  use-text: '%alf% used %skill%!'
+  radius: 5
+Brawn:
+  use-text: '%alf% used %skill%!'
+  duration: 8000
+  damage-percentage: 0.1
+Force:
+  use-text: '%alf% used %skill%!'
+  stun-duration: 2000
+  silence-duration: 2000
+  effect-chance: 0.5
+  radius: 2
+Pummel:
+  use-text: '%alf% used %skill%!'
+  stun-duration: 1500
+  bleed-duration: 5000
+  health-stolen: 0.25
+  damage: 1.5
+  max-distance: 15
+Disarm:
+  use-text: '%alf% used %skill% on %target%!'
+  max-distance: 15
+  duration: 3
+Tame:
+  use-text: '%alf% used %skill% on %target%!'
+  max-distance: 15
+StarBurst:
+  use-text: '%alf% used %skill%!'
+  stun-duration: 5000
+  slow-duration: 0
+  root-duration: 0
+  silence-duration: 0
+  damage: 0
+  damage-per-level: 1000
+  radius: 2
+  charge-velocity: 3

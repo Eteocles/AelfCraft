@@ -35,7 +35,6 @@ public class SkillTame extends TargetedSkill {
 		setIdentifiers(new String[] {"skill tame"});
 		setTypes(new SkillType[] {SkillType.UNBINDABLE});
 		setFireworkEffect(FireworkEffect.builder().flicker(true).withColor(Color.TEAL).withColor(Color.PURPLE).trail(true).with(Type.BURST).build());
-		this.plugin = plugin;
 	}
 
 	@Override

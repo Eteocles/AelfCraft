@@ -80,6 +80,7 @@ public class APlayerListener implements Listener {
 
 		cm.checkClass(alf);
 		alf.syncExperience();
+		alf.syncMana();
 		alf.syncHealth();
 		alf.checkInventory();
 
@@ -175,6 +176,7 @@ public class APlayerListener implements Listener {
 				APlayerListener.this.plugin.getCharacterManager().performSkillChecks(alf);
 				alf.checkInventory();
 				alf.syncExperience();
+				alf.syncMana();
 			}
 		}, 20L);
 	}
